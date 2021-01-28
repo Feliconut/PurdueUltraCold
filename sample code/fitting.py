@@ -75,6 +75,7 @@ def fitM2k(M2k_Exp, imgSysData, paras_guess=None, paras_bounds=None):
 
     def fitFunc(M, *args):
         k_x, k_y = M
+        # parameters to fit
         A, tau, S0, alpha, phi, beta, delta_s = args
         return A * M2kFuncAnal(k_x, k_y, d, tau, S0, alpha, phi, beta, delta_s)
 
@@ -105,6 +106,7 @@ def fitM2k(M2k_Exp, imgSysData, paras_guess=None, paras_bounds=None):
 
     rms_min = np.inf
     for pg in paras_guess:
+        # fitting
         popt_temp, pcov = curve_fit(fitFunc, xdata, ydata, \
                                 p0=pg, maxfev=50000, bounds=paras_bounds)
 

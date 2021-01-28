@@ -134,7 +134,7 @@ def load_bimg(filepath=None,para=None,raw=False, imgnum=[]):
         #load raw images
         else:
             imgpath=filepath+"rawimg_"+ntpath.basename(fname)                
-            if Path(imgpath).exists:
+            if Path(imgpath).exists():
                 ODimg, dataDim = read_binary(imgpath,raw=True)
                 raw1.append(ODimg[0:dataDim[0]//2-1,:])
                 raw2.append(ODimg[dataDim[0]//2:dataDim[0]-1,:])
