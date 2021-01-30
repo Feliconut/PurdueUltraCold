@@ -1,3 +1,4 @@
+import numpy as np
 ##############################################################################
 # Functions for analytical modulation transfer function and fitting
 
@@ -22,6 +23,8 @@ def pupilFunc(R_p, Theta_p, tau, S0, alpha, phi, beta):
     return
 
     Exit pupil function
+    ------
+    source: Hung "diffraction" eqn. 1
     """
     U = np.exp(-(R_p/tau)**2) * np.array(R_p <= 1, dtype=float)
     Phase = S0 * (R_p**4) + \
@@ -68,6 +71,8 @@ def fitM2k(M2k_Exp, imgSysData, paras_guess=None, paras_bounds=None):
     """
     Fit the imaging response function using the model provided in 
     Chen-Lung Hung et al. 2011 New J. Phys. 13 075019
+
+    Hung 2011 eqn. 12
     """
     
     k_x, k_y, K_x, K_y = getFreq(imgSysData["CCDPixelSize"], imgSysData["magnification"], M2k_Exp.shape)
