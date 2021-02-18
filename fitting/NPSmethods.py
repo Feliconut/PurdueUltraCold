@@ -1,3 +1,4 @@
+# %%
 # -*- coding: utf-8 -*-
 """
 Created on Wed Aug  7 09:35:43 2019
@@ -89,6 +90,7 @@ def readInImages(imgDir, numOfImgsInEachRun, parameter, \
         noiseImg_WithoutAtom_temp = \
             img_temp[dim[1]//2:, :].astype(int)[noiseRegion[::-1]]
         
+        # 
         atomODs.append(-ln(atomImg_WithAtom_temp/atomImg_WithoutAtom_temp))
         noiseODs.append(-ln(noiseImg_WithAtom_temp/noiseImg_WithoutAtom_temp))
     
@@ -164,7 +166,7 @@ def calcNPS(imgDir, numOfImgsInEachRun, parameter, trapRegion, noiseRegion, \
     returns
 
     M2k_Exp: numpy.ndarray, the calculated imaging response function 
-        (already subtracted by pure noise result).
+        aalready subtracted by pure noise result).
     M2k_Exp_atom: numpy.ndarray, the imaging response function calculated 
         from images of atoms (suffered from shot noise).
     M2k_Exp_noise: numpy.ndarray, the imaging response function calculated 
@@ -176,10 +178,8 @@ def calcNPS(imgDir, numOfImgsInEachRun, parameter, trapRegion, noiseRegion, \
     atomODs, atomODAvg, noiseODs, noiseODAvg, imgIndexMin, imgIndexMax = \
         readInImages(imgDir, numOfImgsInEachRun, parameter, trapRegion, noiseRegion)
     
-    M2k_Exp_atom, __ = __calcNPS(atomODs, atomODAvg, \
-        norm=norm, imgSysData=imgSysData) 
-    M2k_Exp_noise, __ = __calcNPS(noiseODs, noiseODAvg, \
-        norm=norm, imgSysData=imgSysData)
+    M2k_Exp_atom, _ = __calcNPS(atomODs, atomODAvg, norm=norm, imgSysData=imgSysData) 
+    M2k_Exp_noise, _ = __calcNPS(noiseODs, noiseODAvg, norm=norm, imgSysData=imgSysData)
 
     M2k_Exp_atom = M2k_Exp_atom / atomODAvg.sum()
     M2k_Exp_noise = M2k_Exp_noise / atomODAvg.sum()
@@ -187,7 +187,7 @@ def calcNPS(imgDir, numOfImgsInEachRun, parameter, trapRegion, noiseRegion, \
     M2k_Exp = M2k_Exp_atom #- M2k_Exp_noise 
     
     return M2k_Exp, M2k_Exp_atom, M2k_Exp_noise, imgIndexMin, imgIndexMax, \
-        atomODs, noiseODs, atomODAvg, noiseODAvg
+        atomODAvg, noiseODAvg
 
 ##############################################################################
 # Functions for physics and fitting
@@ -1066,7 +1066,7 @@ def doCalibration(imgDir, resDir, trapRegion, noiseRegion, numOfImgsInEachRun, p
     imgSysData, choices):
     
     M2k_Exp, M2k_Exp_atom, M2k_Exp_noAtom, imgIndexMin, imgIndexMax, \
-        atomODImgs, noiseODImgs, atomODAvg, noiseODAvg = \
+         atomODAvg, noiseODAvg = \
         calcNPS(imgDir, numOfImgsInEachRun, parameter, trapRegion, noiseRegion, norm=choices["normalize"], imgSysData=imgSysData)
    
     if choices["do_Fit"]:
@@ -1086,15 +1086,9 @@ def doCalibration(imgDir, resDir, trapRegion, noiseRegion, numOfImgsInEachRun, p
 
 def doAnalysis(popt, imgDir, resDir, trapRegion, noiseRegion, numOfImgsInEachRun, parameter, imgSysData, choices, M2k):
 
-    args = calcNPS(imgDir, numOfImgsInEachRun, parameter, trapRegion, noiseRegion, norm=choices["normalize"], imgSysData=imgSysData)
-    NPS_Exp, NPS_Exp_atom, NPS_Exp_noAtom, imgIndexMin, imgIndexMax = args[:5]
-    _1, _2, K_X, K_Y = getFreq(imgSysData["CCDPixelSize"], imgSysData["magnification"], NPS_Exp.shape)
-
-    #A_fit, tau_fit, S0_fit, alpha_fit, phi_fit, beta_fit, delta_s_fit = popt
-
-    d = imgSysData["wavelen"] / (2*np.pi*imgSysData["NA"]) 
-
-    #M2k = M2kFuncAnal(K_X, K_Y, d, tau_fit, S0_fit, alpha_fit, phi_fit, beta_fit, delta_s_fit)
+    NPS_Exp, NPS_Exp_atom, NPS_Exp_noAtom, imgIndexMin, imgIndexMax ,*_ = calcNPS(
+        imgDir, numOfImgsInEachRun, parameter, trapRegion, noiseRegion, norm=choices["normalize"], imgSysData=imgSysData)
+    *_, K_X, K_Y = getFreq(imgSysData["CCDPixelSize"], imgSysData["magnification"], NPS_Exp.shape)
 
     K_X, K_Y, S, k, S_azmAvg = calcSk(NPS_Exp, M2k, imgSysData)
 
