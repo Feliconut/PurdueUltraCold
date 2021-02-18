@@ -82,6 +82,7 @@ def read_image(imgDir,
     ODs_atom_avg = np.nan_to_num(sum(ODs_atom) / len(ODs_atom))
     ODs_noise_avg = np.nan_to_num(sum(ODs_noise) / len(ODs_noise))
 
+    OD_data = (ODs_atom, ODs_atom_avg, ODs_noise, ODs_noise_avg)
     img_index_range = imgIndexMin, imgIndexMax
 
-    return ODs_atom, ODs_atom_avg, ODs_noise, ODs_noise_avg, img_index_range
+    return OD_data, img_index_range

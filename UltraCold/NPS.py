@@ -3,7 +3,7 @@ from numpy import abs, pi
 from numpy.fft import fftshift, fft2
 
 
-def _sd_from_od(OD, imgSysData=None):
+def _an_from_od(OD, imgSysData=None):
     """
     Calculate atom surface density (sd) from optical density (od).
     """
@@ -40,10 +40,11 @@ def from_od(ODs, OD_avg, norm=False, imgSysData=None):
     for OD in ODs:
         noise = OD - OD_avg
         if norm:
-            noise = _sd_from_od(noise, imgSysData)
+            noise = _an_from_od(noise, imgSysData)
         noiseFFT = fftshift(fft2(fftshift(noise)))
-        NPSs_avg = abs(noiseFFT)**2
-        NPSs.append(NPSs_avg)
+        NPS = abs(noiseFFT)**2
+        NPSs.append(NPS)
 
     NPSs_avg = sum(NPSs) / len(NPSs)
     return NPSs_avg, NPSs
+

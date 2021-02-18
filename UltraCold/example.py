@@ -9,7 +9,7 @@ def plot_od_avg(imgDir,
             noiseRegion=(slice(0, 65535), slice(0, 65535)),
             vRange=[0, 0.5]):
 
-    _, atomODAvg, *_ = read_image(imgDir)
+    (_, atomODAvg,*_), _ = read_image(imgDir)
 
     fig_atom = plt.figure()
     ax_atom = fig_atom.add_subplot(111)
