@@ -1,3 +1,3 @@
 from .example import plot_od_avg
-from .load_data import read_image
+from .OD import from_image_dir
 from . import NPS

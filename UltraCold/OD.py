@@ -1,11 +1,12 @@
 import os
 
+import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import numpy as np
 from numpy import log as ln
 
 
-def read_image(imgDir,
+def from_image_dir(imgDir,
                ramping_param=0,
                trapRegion=(slice(0, 65535), slice(0, 65535)),
                noiseRegion=(slice(0, 65535), slice(0, 65535))):
@@ -86,3 +87,36 @@ def read_image(imgDir,
     img_index_range = imgIndexMin, imgIndexMax
 
     return OD_data, img_index_range
+   
+def visualize(atomOD, X=None, Y=None, axes=None, cMap=cm.jet, vRange=None):
+    """
+    Plot the averaged image (OD) of the 2D thermal atmoic gas
+    """
+    if axes == None:
+        fig_atom = plt.figure(figsize=(6, 4.5))
+        ax_atom = fig_atom.add_subplot(111)
+    else:
+        ax_atom = axes
+    
+    if X == None or Y == None:
+        if vRange == None:
+            pc_atom = ax_atom.pcolor(atomOD, cmap=cMap)
+        else:
+            pc_atom = ax_atom.pcolor(atomOD, cmap=cMap, \
+                vmin=max(vRange[0], atomOD.min()), \
+                vmax=min(vRange[1], atomOD.max()))
+        ax_atom.set_xlabel('$x$ (px)')
+        ax_atom.set_ylabel('$y$ (px)')
+    else:
+        if vRange == None:
+            pc_atom = ax_atom.pcolor(X, Y, atomOD, cmap=cMap)
+        else:
+            pc_atom = ax_atom.pcolor(X, Y, atomOD, cmap=cMap, \
+                vmin=max(vRange[0], atomOD.min()), \
+                vmax=min(vRange[1], atomOD.max()))
+        ax_atom.set_xlabel('$x$ ($\\mu$m)')
+        ax_atom.set_ylabel('$y$ ($\\mu$m)')
+    plt.colorbar(pc_atom, extend='both')
+    ax_atom.set_aspect(1)
+    ax_atom.set_title("2D thermal gas (OD)")
+    return fig_atom, ax_atom
