@@ -1,4 +1,4 @@
-jfrom matplotlib import pyplot as plt
+from matplotlib import pyplot as plt
 from matplotlib import cm
 from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 import numpy as np
