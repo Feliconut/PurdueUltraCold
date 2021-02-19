@@ -1,3 +1,4 @@
+# %%
 from img_load import load_bimg
 import numpy as np
 import matplotlib.pyplot as plt
@@ -6,18 +7,20 @@ folderpath = './211412/'
 pi = 3.1415926
 
 psat=277
+# %%
 # intensity at each pixel
 result=load_bimg(folderpath, raw=True)
 #od=np.mean((-np.log(result['raw1']/result['raw2'])-(result['raw1']-result['raw2'])/psat),axis=0)
 # Optical Density 
 odimg=-np.log(result['raw1']/result['raw2'])-(result['raw1']-result['raw2'])/psat
 np.save('od_image', odimg)
-
+# %%
 fig, ax = plt.subplots()
 im = ax.imshow(odimg[1])
 plt.colorbar(im)
+plt.show()
 plt.savefig('OD.png') # First optical density graph
-
+# %%
 sc = 1 # (temporary) structural factor: pixel area divided by resonance cross section
 xc = 150
 yc = 150

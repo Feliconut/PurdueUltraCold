@@ -22,10 +22,9 @@ import matplotlib.cm as cm
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib.ticker import MultipleLocator
 
-from .NPSmethods import *
+from NPSmethods import *
 
 
-# %%
 # %% pre-settings
 
 imgSysData = {
@@ -88,7 +87,7 @@ showExampleImg(imgDir,
                trapRegion=trapRegion,
                noiseRegion=noiseRegion,
                vRange=[0, 0.5])
-
+# %%
 atomODs, atomODAvg, noiseODs, noiseODAvg, imgIndexMin, imgIndexMax = readInImages(
     imgDir, numOfImgsInEachRun, rampingParameter, trapRegion, noiseRegion)
 
