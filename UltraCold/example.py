@@ -1,6 +1,6 @@
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
-
+import numpy as np
 from .OD import from_image_dir
 
 
@@ -9,7 +9,9 @@ def plot_od_avg(imgDir,
                 noiseRegion=(slice(0, 65535), slice(0, 65535)),
                 vRange=[0, 0.5]):
 
-    (_, atomODAvg, *_), _ = from_image_dir(imgDir)
+    atomODs, *_ = from_image_dir(imgDir)
+
+    atomODAvg = np.mean(atomODs,axis=0)
 
     fig_atom = plt.figure()
     ax_atom = fig_atom.add_subplot(111)
@@ -50,7 +52,7 @@ def do_analysis(img_dir,
                 M2k,
                 normalize=False):
     from . import MTF, NPS, Sk
-    OD_data, img_index_range = from_image_dir(img_dir,
+    *OD_data, img_index_range = from_image_dir(img_dir,
                                               trapRegion=trapRegion,
                                               noiseRegion=noiseRegion)
     NPS_Exp, *_ = MTF.from_od(OD_data, norm=normalize, imgSysData=imgSysData)

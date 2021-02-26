@@ -2,13 +2,6 @@ from typing import NamedTuple
 
 import numpy as np
 
-OD_data = NamedTuple('OD_data',
-                     ODs_atom=object,
-                     ODs_atom_avg=object,
-                     ODs_noise=object,
-                     ODs_noise_avg=object)
-
-
 def get_freq(CCDPixelSize, magnification, M2k_mat_shape):
     """
     Calculate the corresponding spacial frequency $k$.

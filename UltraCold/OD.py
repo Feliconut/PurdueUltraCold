@@ -80,13 +80,14 @@ def from_image_dir(imgDir,
         ODs_atom.append(OD_atom)
         ODs_noise.append(OD_noise)
 
-    ODs_atom_avg = np.nan_to_num(sum(ODs_atom) / len(ODs_atom))
-    ODs_noise_avg = np.nan_to_num(sum(ODs_noise) / len(ODs_noise))
+    # ODs_atom_avg = np.nan_to_num(sum(ODs_atom) / len(ODs_atom))
+    # ODs_noise_avg = np.nan_to_num(sum(ODs_noise) / len(ODs_noise))
 
-    OD_data = (ODs_atom, ODs_atom_avg, ODs_noise, ODs_noise_avg)
+    # OD_data = (ODs_atom, ODs_atom_avg, ODs_noise, ODs_noise_avg)
     img_index_range = imgIndexMin, imgIndexMax
 
-    return OD_data, img_index_range
+    return ODs_atom, ODs_noise, img_index_range
+    # return OD_data, img_index_range
    
 def visualize(atomOD, X=None, Y=None, axes=None, cMap=cm.jet, vRange=None):
     """

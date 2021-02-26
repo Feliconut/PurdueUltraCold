@@ -22,7 +22,7 @@ def _an_from_od(OD, imgSysData=None):
     return AtomNum
 
 
-def from_od(ODs, OD_avg, norm=False, imgSysData=None):
+def from_od(ODs, OD_avg = None, norm=True, imgSysData=None):
     """
     Calculate the noise power spectrum (NPS), from a set of images and their
     average. Note that `ODs` is considered as an ensemble, which means each
@@ -36,17 +36,17 @@ def from_od(ODs, OD_avg, norm=False, imgSysData=None):
         spectrum. If false, use OD to calculate. In the latter case, the 
         absolute value of the noise power spectrum is meaningless.
 
-    noisePowSpecs: list, each element of which is the noise power spectrums of
-        an image in `ODs`. 
-    NPS: numpy.ndarray, the average of noisePowSpecs, which is taken as 
+    NPSs_avg: numpy.ndarray, the average of noisePowSpecs, which is taken as 
         ensemble average
+    NPSs: list, each element of which is the noise power spectrums of
+        an image in `ODs`. 
     """
-
     NPSs = []
+    if OD_avg is None:
+        OD_avg = np.mean(ODs, axis=0) 
     for OD in ODs:
         noise = OD - OD_avg
-        if norm:
-            noise = _an_from_od(noise, imgSysData)
+        if norm: noise = _an_from_od(noise, imgSysData)
         noiseFFT = fftshift(fft2(fftshift(noise)))
         NPS = abs(noiseFFT)**2
         NPSs.append(NPS)

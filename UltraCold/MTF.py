@@ -29,7 +29,11 @@ def from_od(OD_data, norm=False, imgSysData=None):
     imgIndexMin, imgIndexMax, atomODs, noiseODs, atomODAvg, noiseODAvg: 
         same as `readInImages` 
     """
-    ODs_atom, ODs_atom_avg, ODs_noise, ODs_noise_avg = OD_data
+    # ODs_atom, ODs_atom_avg, ODs_noise, ODs_noise_avg = OD_data
+    ODs_atom, ODs_noise = OD_data
+
+    ODs_atom_avg = np.mean(ODs_atom, axis=0)
+    ODs_noise_avg = np.mean(ODs_noise, axis=0)
 
     # M2k_Exp is same as NPSs_avg.
     M2k_Exp_atom, _ = NPS.from_od(ODs_atom, ODs_atom_avg, norm, imgSysData)
