@@ -5,7 +5,22 @@ packing sample regions into OD image'''
 from itertools import product
 
 
-def pack(OD_size, noise_size, trap_rect):
+def pack(OD_size, noise_size, trap_rect, only_pos=False):
+    """
+    @brief pack noise regions into OD image, avoiding intersection.
+    No intersection among noise regions, or between noise regions and the trap region.
+    The current algorithm is crude and not optimal for rectangular noise regions.
+    
+    @param OD_size (`x size`, `y size`), whre `x size` and `y size` are `int`. Denotes size of OD image.
+
+    @param noise_size similar to OD_size. Denotes size of all noise regions.
+
+    @param trap_rect (`x size`,`y size`, `x spread (width)`, `y spread(height)`). Denotes the trap region.
+
+    @param only_pos `boolean` controls the return value.
+
+    @return list of trap region slicers if `only_pos` is False. list of trap region positions otherwise.
+    """
     X, Y = OD_size
     x0, y0 = noise_size
     x, y, dx, dy = trap_rect
@@ -37,16 +52,17 @@ def pack(OD_size, noise_size, trap_rect):
         shelf(x + dx, 0, 0, y + dy)
     else:
         shelf(x + dx, 0, X, Y)
-    return noise_pos
 
-
-# %%
-print(pack((300, 300), (64, 64), (100, 100, 120, 130)))
+    if only_pos:
+        return noise_pos
+    else:
+        return [(slice(x, x + x0), slice(y, y + y0)) for x, y in noise_pos]
 
 
 # %%
 def pack_and_visualize(OD_size, noise_size, trap_rect, noise_pos=[]):
-    if not noise_pos: noise_pos = pack(OD_size, noise_size, trap_rect)
+    if not noise_pos:
+        noise_pos = pack(OD_size, noise_size, trap_rect, only_pos=True)
     X, Y = OD_size
     x0, y0 = noise_size
     x, y, dx, dy = trap_rect
@@ -67,8 +83,9 @@ def pack_and_visualize(OD_size, noise_size, trap_rect, noise_pos=[]):
 
     plt.show()
     print(noise_pos)
+    return noise_pos
 
 
 # %% TESTING
-pack_and_visualize((300, 300), (64, 64), (100, 100, 120, 130))
+# pack_and_visualize((300, 300), (64, 64), (100, 100, 120, 130))
 # %%
