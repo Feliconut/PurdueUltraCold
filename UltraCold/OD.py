@@ -1,15 +1,15 @@
-import os
-
-import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+import matplotlib.pyplot as plt
 import numpy as np
 from numpy import log as ln
 
+from .util.labling import approx_trap_region
+
 
 def from_image_dir(imgDir,
-               ramping_param=0,
-               trapRegion=(slice(0, 65535), slice(0, 65535)),
-               noiseRegion=(slice(0, 65535), slice(0, 65535))):
+                   ramping_param=0,
+                   trapRegion=(slice(0, 65535), slice(0, 65535)),
+                   noiseRegion=(slice(0, 65535), slice(0, 65535))):
     """
     Read in images, and calculate optical depth (OD).
     It selects two regions, one with atoms, one without atoms. The latter is
@@ -88,7 +88,8 @@ def from_image_dir(imgDir,
 
     return ODs_atom, ODs_noise, img_index_range
     # return OD_data, img_index_range
-   
+
+
 def visualize(atomOD, X=None, Y=None, axes=None, cMap=cm.jet, vRange=None):
     """
     Plot the averaged image (OD) of the 2D thermal atmoic gas
@@ -98,7 +99,7 @@ def visualize(atomOD, X=None, Y=None, axes=None, cMap=cm.jet, vRange=None):
         ax_atom = fig_atom.add_subplot(111)
     else:
         ax_atom = axes
-    
+
     if X == None or Y == None:
         if vRange == None:
             pc_atom = ax_atom.pcolor(atomOD, cmap=cMap)
@@ -121,3 +122,50 @@ def visualize(atomOD, X=None, Y=None, axes=None, cMap=cm.jet, vRange=None):
     ax_atom.set_aspect(1)
     ax_atom.set_title("2D thermal gas (OD)")
     return fig_atom, ax_atom
+
+from os import listdir
+from os.path import join
+
+
+def iter_through_dir(DATA_DIR = 'DATA', auto_trap = True,mode='flat'):
+    for dataset_id in listdir(DATA_DIR):
+        if '.' in dataset_id: continue
+        dataset_path = join(DATA_DIR, dataset_id)
+        ods, _, _ = from_image_dir(dataset_path)
+        print(f'id: {dataset_id}, #img: {len(ods)}')
+        if not len(ods): continue
+
+        # od_mean = np.mean(ods, axis=0)
+        # od_var = np.mean([(od - od_mean)**2 for od in ods], axis=0)
+
+        # determine noise regions
+        if auto_trap:
+            try:
+                if mode == 'flat':
+                    for i, od in enumerate(get_trap_image(ods)):
+                        yield od, dataset_id, i
+                elif mode == 'group':
+                    yield ods, dataset_id
+            except:
+                print(f'id: {dataset_id} skipped due to bad trap region')
+            continue
+        # noise_regions = pack(od_mean.shape, DATA_SIZE,
+        #                      (trap_x.start, trap_y.start, trap_x.stop -
+        #                       trap_x.start, trap_y.stop - trap_y.start))
+        else:
+            if mode == 'flat':
+                for i, od in enumerate(ods): yield od, dataset_id, i
+            elif mode == 'group':
+                yield ods, dataset_id
+
+def get_trap_image(ods):
+    od_mean = np.mean(ods, axis=0)
+    try:
+        trap_region = approx_trap_region(od_mean, 5)
+    except:
+        raise
+    for od in ods:
+        yield od[trap_region]
+
+            
+                
