@@ -1,3 +1,7 @@
+"""
+Loading and Visualization of Optical Density image.
+"""
+
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import numpy as np
@@ -128,6 +132,21 @@ from os.path import join
 
 
 def iter_through_dir(DATA_DIR = 'DATA', auto_trap = True,mode='flat'):
+    """
+    @brief Iterate through a data directory with many datasets in separate folders.
+    
+    @param DATA_DIR optional. The path to root data folder.
+    
+    @param auto_trap If set `True`, the trap_region will be automatically extracted.
+    The yielded od images will be only the trap region. 
+    If `false`, entire od image will be yielded.
+
+    @param mode If set to `flat`, yield one od image at a time. If set to `group`, yield a whole dataset of ods at a time.
+
+    @return A generator of od images. Each yielded item will be
+    `(od, dataset_id, index_in_dataset)` for `flat`, and
+    `(ods, dataset_id)` for `group`.
+    """
     for dataset_id in listdir(DATA_DIR):
         if '.' in dataset_id: continue
         dataset_path = join(DATA_DIR, dataset_id)
