@@ -164,7 +164,7 @@ def iter_through_dir(DATA_DIR = 'DATA', auto_trap = True,mode='flat'):
                     for i, od in enumerate(get_trap_image(ods)):
                         yield od, dataset_id, i
                 elif mode == 'group':
-                    yield ods, dataset_id
+                    yield list(get_trap_image(ods)), dataset_id
             except:
                 print(f'id: {dataset_id} skipped due to bad trap region')
             continue
@@ -187,4 +187,33 @@ def get_trap_image(ods):
         yield od[trap_region]
 
             
-                
+def get_dataset(dataset_id, auto_trap = True,mode='flat',DATA_DIR = "DATA"):
+    dataset_path = join(DATA_DIR, dataset_id)
+    ods, _, _ = from_image_dir(dataset_path)
+    print(f'id: {dataset_id}, #img: {len(ods)}')
+    if not len(ods): return
+
+    # od_mean = np.mean(ods, axis=0)
+    # od_var = np.mean([(od - od_mean)**2 for od in ods], axis=0)
+
+    # determine noise regions
+    if auto_trap:
+        try:
+            if mode == 'flat':
+                for i, od in enumerate(get_trap_image(ods)):
+                    yield od, dataset_id, i
+            elif mode == 'group':
+                yield list(get_trap_image(ods)), dataset_id
+        except:
+            print(f'id: {dataset_id} skipped due to bad trap region')
+        
+    # noise_regions = pack(od_mean.shape, DATA_SIZE,
+    #                      (trap_x.start, trap_y.start, trap_x.stop -
+    #                       trap_x.start, trap_y.stop - trap_y.start))
+    else:
+        if mode == 'flat':
+            for i, od in enumerate(ods): yield od, dataset_id, i
+        elif mode == 'group':
+            yield ods, dataset_id
+
+ 

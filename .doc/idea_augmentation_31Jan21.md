@@ -53,3 +53,4 @@ Instead of treating the problem as `single_image - to - parameters` prediction p
     Image GAN. It can learn what an ideal image "look like", and then generate an ideal that is closest to the raw image.
     
     Image CNN AutoEncoder. It is a "compress-decompress" process that might drop the details (which is the noise) and leave the overall tendency (which is the ideal image)
+    
