@@ -43,7 +43,6 @@ for ods, dataset_id in OD.iter_through_dir(mode='group'):
     if abs(W - H) / (W + H) > 0.1:
         print(f'id{dataset_id} do not have square-like trap region. Reject.')
         continue
-    side = min(W, H)
 
     def cropND(img, bounding):
         start = tuple(map(lambda a, da: a // 2 - da // 2, img.shape, bounding))
@@ -51,12 +50,32 @@ for ods, dataset_id in OD.iter_through_dir(mode='group'):
         slices = tuple(map(slice, start, end))
         return img[slices]
 
-    def crop(img, side):
-        img = cropND(img, (side, side))
-        return cv2.resize(img, (128, 128), interpolation=cv2.INTER_LINEAR)
+    def boundary_values(img):
+        res = []
+        res.extend(list(img[0:, 0]))
+        res.extend(list(img[0:, -1]))
+        res.extend(list(img[0, 0:]))
+        res.extend(list(img[-1, 0:]))
+        return res
 
-    ods_fft = [crop(img, side) for img in ods_fft]
-    odfftavg = crop(odfftavg, side)
+    def crop(img):
+        # img = cropND(img, (side, side))
+        #Creating a dark square with NUMPY
+        s = 300
+        f = np.zeros((s, s))
+        # f.fill(np.mean(img))
+        f.fill(np.mean(boundary_values(img)))
+
+        #Getting the centering position
+        ax, ay = (s - img.shape[1]) // 2, (s - img.shape[0]) // 2
+
+        #Pasting the 'image' in a centering position
+        f[ay:img.shape[0] + ay, ax:ax + img.shape[1]] = img
+
+        return cropND(f, (128, 128))
+
+    ods_fft = [crop(img) for img in ods_fft]
+    odfftavg = crop(odfftavg )
 
     # map the clipped image to [-1,1]
     # standardization
@@ -112,6 +131,7 @@ print(f'included datasets: {",".join(included_dataset)}')
 
 # %%
 print('start saving')
-np.savez_compressed(join(dirname(__file__), 'data/data128'), src_list, tar_list)
+np.savez_compressed(join(dirname(__file__), 'data/data128'), src_list,
+                    tar_list)
 print('finish saving')
 # %%
