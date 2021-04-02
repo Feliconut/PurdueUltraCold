@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.optimize.minpack import curve_fit
+from typing_extensions import TypedDict
 
 from . import NPS
 from .util import get_freq
@@ -84,7 +85,7 @@ def mtf(K_X, K_Y, d, tau, S0, alpha, phi, beta, delta_s):
     return M2k
 
 
-def fit(M2k_Exp, imgSysData, paras_guess=None, paras_bounds=None):
+def fit(M2k_Exp, imgSysData, paras_guess=None, paras_bounds=None, dict_format = False):
     """
     Fit the imaging response function using the model provided in 
     Chen-Lung Hung et al. 2011 New J. Phys. 13 075019
@@ -135,6 +136,7 @@ def fit(M2k_Exp, imgSysData, paras_guess=None, paras_bounds=None):
 
         A_fit, tau_fit, S0_fit, alpha_fit, phi_fit, beta_fit, delta_s_fit = popt_temp
 
+
         M2k_Fit = A_fit * mtf(K_x, K_y, d, tau_fit, \
                             S0_fit, alpha_fit, phi_fit, beta_fit, delta_s_fit)
 
@@ -142,5 +144,24 @@ def fit(M2k_Exp, imgSysData, paras_guess=None, paras_bounds=None):
         if rms < rms_min:
             rms_min = rms
             popt = popt_temp
+
+    if dict_format:
+        params = {
+            'A_fit': A_fit,
+            'tau_fit': tau_fit,
+            'S0_fit': S0_fit,
+            'alpha_fit': alpha_fit,
+            'phi_fit': phi_fit,
+            'beta_fit': beta_fit,
+            'delta_s_fit': delta_s_fit,
+            'd': d,
+            'kx':k_x,
+            'ky':k_y,
+            'Kx':K_x,
+            'Ky':K_y,
+            'pcov':pcov
+        }
+        res = {'M2k':M2k_Fit, 'params':params, 'rms':rms_min}
+        return res
 
     return M2k_Fit, rms_min, popt, pcov, k_x, k_y, K_x, K_y, d

@@ -13,18 +13,19 @@ def find_rect(raw_img):
     @return A list of rectangles, where each rectangle = [xpos, ypos, width, height]
     """
     img = raw_img.copy()
+    img = np.clip(img, 0, 100)
     img = cv2.GaussianBlur(img, (5, 5), 2)
     m, M = img.min(), img.max()
 
     img = ((img - m) / (M - m) * 255).astype(np.uint8)
-    img = cv2.threshold(img, 100, 200, cv2.THRESH_BINARY)[1]
+    img = cv2.threshold(img, 50, 200, cv2.THRESH_BINARY)[1]
     contours = cv2.findContours(img, cv2.RETR_EXTERNAL,
                                 cv2.CHAIN_APPROX_SIMPLE)[0]
 
-    return [cv2.boundingRect(c) for c in contours if cv2.contourArea(c) > 3000]
+    return [cv2.boundingRect(c) for c in contours if 9e4/2 > cv2.contourArea(c) > 3000]
 
 
-def approx_trap_region(OD_img, padding = 5):
+def approx_trap_region(OD_img, padding=5):
     """
     @brief Finds a trap region slicer for an OD image.
 

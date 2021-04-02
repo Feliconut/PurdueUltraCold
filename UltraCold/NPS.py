@@ -155,6 +155,7 @@ def visualize_line_cut(
     k_x,
     k_y,
     M2k_Fit,
+    **kwargs
 ):
     """
     Plot noise power spectrum - line cut

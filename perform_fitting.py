@@ -57,63 +57,56 @@ rampingParameter = 0
 
 # %% TEST
 
-plot_od_avg(img_dir,trapRegion,noiseRegion)
+# plot_od_avg(img_dir,trapRegion,noiseRegion)
 # %%
 # ODs_atom, ODs_atom_avg, ODs_noise, ODs_noise_avg = OD_data
-from UltraCold import OD
+# from UltraCold import OD
 
-*OD_data, img_index_range = OD.from_image_dir(img_dir,
-                                              ramping_param=rampingParameter,
-                                              noiseRegion=noiseRegion,
-                                              trapRegion=trapRegion)
-ODs_atom, ODs_noise = OD_data
 
-# %%
-M2k_Exp, M2k_Exp_atom, M2k_Exp_noise = MTF.from_od(OD_data)
+# *OD_data, img_index_range = OD.from_image_dir(img_dir,
+#                                               ramping_param=rampingParameter,
+#                                               noiseRegion=noiseRegion,
+#                                               trapRegion=trapRegion)
+# ODs_atom, ODs_noise = OD_data
+#     # %%
+# M2k_Exp, M2k_Exp_atom, M2k_Exp_noise = MTF.from_od(OD_data)
+# # %%
+# *_, K_X, K_Y = get_freq(imgSysData["CCDPixelSize"],
+#                         imgSysData["magnification"], M2k_Exp.shape)
 
-*_, K_X, K_Y = get_freq(imgSysData["CCDPixelSize"],
-                        imgSysData["magnification"], M2k_Exp.shape)
+# NPS.visualize_exp(M2k_Exp, K_X, K_Y)
 
-NPS.visualize_exp(M2k_Exp, K_X, K_Y)
+# # %% # Calibrate
+# M2k_Exp, _ = NPS.from_od(OD_data, imgSysData=imgSysData)
+    # %%
+def fit(M2k_Exp):
+    res = MTF.fit(M2k_Exp, imgSysData, dict_format=True)
+    M2k_Fit, params = res['M2k'], res['params']
+    # %%
+    params['K_x'] = params['Kx']
+    params['K_y'] = params['Ky']
+    params['k_x'] = params['kx']
+    params['k_y'] = params['ky']
 
-# %% # Calibrate
-M2k_Exp, _ = NPS.from_od(ODs_noise, imgSysData=imgSysData)
-M2k_Fit, rms_min, popt, pcov, k_x, k_y, K_x, K_y, d = MTF.fit(
-    M2k_Exp, imgSysData)
+    NPS.visualize_exp_fit(M2k_Exp, **params, M2k_Fit=M2k_Fit)
+    NPS.visualize_line_cut(M2k_Exp, **params, M2k_Fit=M2k_Fit)
+    # %%
+    from UltraCold.plotting import (fplot_NPS_ExpAndFit, fplot_PSF,
+                                    fplot_PSF_abs2, fplot_PSF_abs2_LineCut,
+                                    fplot_PSF_LineCut, fplot_pupil)
 
-# %%
+    fplot_pupil(**params)
+    fplot_PSF(**params)
+    fplot_PSF_LineCut(**params)
+    fplot_PSF_abs2(**params)
+    resolution, _1, _2 = fplot_PSF_abs2_LineCut(**params)
+    print("The Rayleigh-criterion resolution is approximately {:.1f} micron".
+          format(resolution))
+    fplot_NPS_ExpAndFit(
+        M2k_Exp,
+        **params,
+        M2k_Fit=M2k_Fit,
+    )
 
-NPS.visualize_exp_fit(M2k_Exp, K_x, K_y, M2k_Fit)
-NPS.visualize_line_cut(M2k_Exp, k_x, k_y, M2k_Fit)
-# %%
-A_fit, tau_fit, S0_fit, alpha_fit, phi_fit, beta_fit, delta_s_fit = popt
-params = {
-    'A_fit': A_fit,
-    'tau_fit': tau_fit,
-    'S0_fit': S0_fit,
-    'alpha_fit': alpha_fit,
-    'phi_fit': phi_fit,
-    'beta_fit': beta_fit,
-    'delta_s_fit': delta_s_fit,
-    'd': d
-}
-from UltraCold.plotting import (fplot_NPS_ExpAndFit, fplot_PSF, fplot_PSF_abs2,
-                                fplot_PSF_abs2_LineCut, fplot_PSF_LineCut,
-                                fplot_pupil)
-
-fplot_pupil(**params)
-fplot_PSF(**params)
-fplot_PSF_LineCut(**params)
-fplot_PSF_abs2(**params)
-resolution, _1, _2 = fplot_PSF_abs2_LineCut(**params)
-print(
-    "The Rayleigh-criterion resolution is approximately {:.1f} micron".format(
-        resolution))
-fplot_NPS_ExpAndFit(
-    K_x,
-    K_y,
-    M2k_Exp,
-    M2k_Fit,
-)
 
 # %%

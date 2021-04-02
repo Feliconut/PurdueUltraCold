@@ -19,7 +19,7 @@ baseDir = getcwd()
 DATA_DIR = join(baseDir, 'DATA')
 
 # %%
-src_list, tar_list = [], []
+src_list, tar_list, id_list = [], [], []
 # mean_list = []
 CUTOFF = 99.65
 included_dataset = []
@@ -29,7 +29,7 @@ def odfft(od):
     return abs(fftshift(fft2(fftshift(od))))
 
 
-def get_vmax(img, q):
+def get_vmax(img, q=CUTOFF):
     return np.percentile(img.flatten(), q)
 
 
@@ -74,25 +74,28 @@ for ods, dataset_id in OD.iter_through_dir(mode='group'):
 
         return cropND(f, (128, 128))
 
-    ods_fft = [crop(img) for img in ods_fft]
-    odfftavg = crop(odfftavg )
+    ods_fft = list(map(crop, ods_fft))
+    odfftavg = crop(odfftavg)
 
     # map the clipped image to [-1,1]
     # standardization
-    od_cutoff = sum(
-        (get_vmax(od_fft, CUTOFF) for od_fft in ods_fft)) / len(ods)
-    fftavg_cutoff = get_vmax(odfftavg, CUTOFF)
-    new_src_list = [
-        np.clip(od_fft * 2 / od_cutoff - 1, -1, 1) for od_fft in ods_fft
-    ]
+    od_cutoff = sum((map(get_vmax), ods_fft)) / len(ods)
+    fftavg_cutoff = get_vmax(odfftavg)
+    new_src_list = list(
+        map(lambda od_fft: np.clip(od_fft * 2 / od_cutoff - 1, -1, 1),
+            ods_fft))
     new_tar_list = [np.clip(odfftavg * 2 / fftavg_cutoff - 1, -1, 1)
                     ] * len(ods_fft)
 
     img_iter = zip(ods, new_src_list, new_tar_list)
     while True:
-        rawinput = input(
-            'C = next image if possible, A = accept current dataset, D = decline current dataset, E = exit'
-        )
+        # rawinput = input(
+        #     'C = next image if possible, A = accept current dataset, D = decline current dataset, E = exit'
+        # )
+        accepted_ids = set(
+            '031550,051352,051624,051649,141001,141147,141153,141201,141206,141902,151033,151038,151413,151418,191428,191433,191439,191444,191450,191454,191457,211412,211455,211503,211508,211513,221119,221124,221524,221529'
+            .split(','))
+        rawinput = 'A' if dataset_id in accepted_ids else 'D'
         if rawinput == 'C' or rawinput == '':
             try:
                 od, srcimg, tarimg = next(img_iter)
@@ -117,6 +120,7 @@ for ods, dataset_id in OD.iter_through_dir(mode='group'):
         elif rawinput == 'A':
             src_list.extend(new_src_list)
             tar_list.extend(new_tar_list)
+            id_list.extend([dataset_id] * len(ods_fft))
             included_dataset.append(dataset_id)
             print(f'accept dataset {dataset_id}')
             break
@@ -129,9 +133,13 @@ print('COMPLETE')
 print(f'we have {len(src_list)} images in total')
 print(f'included datasets: {",".join(included_dataset)}')
 
+
 # %%
-print('start saving')
-np.savez_compressed(join(dirname(__file__), 'data/data128'), src_list,
-                    tar_list)
-print('finish saving')
+def save():
+    print('start saving')
+    np.savez_compressed(join(dirname(__file__), 'data/data128'), src_list,
+                        tar_list, id_list)
+    print('finish saving')
+
+
 # %%
