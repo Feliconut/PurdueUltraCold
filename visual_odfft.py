@@ -38,7 +38,7 @@ for od, dataset_id, i_in_dataset in OD.iter_through_dir(mode='flat'):
     plt.imshow(odfft(od), vmax=maxval)
     plt.title(f'id{dataset_id}#{i_in_dataset}, MAXVAL={maxval}')
     plt.colorbar()
-    plt.savefig(f'out/id{dataset_id}.{i_in_dataset}-MAX{maxval}.png')
+    # plt.savefig(f'out/id{dataset_id}.{i_in_dataset}-MAX{maxval}.png')
     plt.show()
 # %% GENERATE FFT_OD_HSIT
 odhist([odfft(od) for od in OD.iter_through_dir(mode='group').__next__()[0]],
@@ -63,7 +63,7 @@ def get_vmax(img, q):
 
 # %% MANUAL ADJUST OF quantile
 q = 99.65
-MANUAL = False
+MANUAL = True
 for ods, dataset_id in OD.iter_through_dir(mode='group'):
     fftavg = np.mean([odfft(od) for od in ods],axis=0)
     if MANUAL:
@@ -75,9 +75,12 @@ for ods, dataset_id in OD.iter_through_dir(mode='group'):
         except ValueError:
             break
     maxval = get_vmax(fftavg,q)
+    plt.imshow(od)
     plt.imshow(fftavg, vmax=maxval)
     plt.title(f'id{dataset_id}#, q={q}, FFT-MEAN')
     plt.colorbar()
     plt.savefig(f'out/id{dataset_id}-q{q}-FFT-MEAN.png')
     plt.show()
 # %%
+# FIND THRESH BY MAXIMIZING INFORMATION
+

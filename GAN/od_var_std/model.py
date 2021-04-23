@@ -319,6 +319,7 @@ dl1, dl2, gl = train(d_model,
                      gan_model, (src_train, tar_train),
                      n_epochs=4,
                      n_batch=2)
+# %%
 
 # %%
 # summarize_performance(1268, g_model, dataset)

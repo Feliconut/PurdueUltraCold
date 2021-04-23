@@ -13,11 +13,12 @@ def find_rect(raw_img):
     @return A list of rectangles, where each rectangle = [xpos, ypos, width, height]
     """
     img = raw_img.copy()
+    img = np.clip(img, 0, 100)
     img = cv2.GaussianBlur(img, (5, 5), 2)
     m, M = img.min(), img.max()
 
     img = ((img - m) / (M - m) * 255).astype(np.uint8)
-    img = cv2.threshold(img, 100, 200, cv2.THRESH_BINARY)[1]
+    img = cv2.threshold(img, 50, 200, cv2.THRESH_BINARY)[1]
     contours = cv2.findContours(img, cv2.RETR_EXTERNAL,
                                 cv2.CHAIN_APPROX_SIMPLE)[0]
 
