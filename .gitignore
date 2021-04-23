@@ -129,3 +129,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 sample code/__pycache__/img_load.cpython-37.pyc
+/out
+*.npz
+*.h5
+*.png
+results
+.doc

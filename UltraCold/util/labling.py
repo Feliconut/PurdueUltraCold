@@ -21,10 +21,23 @@ def find_rect(raw_img):
     contours = cv2.findContours(img, cv2.RETR_EXTERNAL,
                                 cv2.CHAIN_APPROX_SIMPLE)[0]
 
-    return [cv2.boundingRect(c) for c in contours if cv2.contourArea(c) > 3000]
+    return [
+        cv2.boundingRect(c) for c in contours
+        if 9e4 / 2 > cv2.contourArea(c) > 3000
+    ]
 
 
-def approx_trap_region(OD_img, padding = 5):
+def find_brightest_square(raw_img, side):
+    from scipy.optimize import brute
+    X, Y, *_ = raw_img.shape
+    f = lambda x, y: -np.sum(raw_img[slice(x, x + side), slice(y, y + side)])
+    x, *_ = brute(lambda p: f(*p), (slice(0, X - side), slice(0, Y - side)),
+                  finish=None,
+                  full_output=True)
+    return x
+
+
+def approx_trap_region(OD_img, size=100):
     """
     @brief Finds a trap region slicer for an OD image.
 
@@ -35,11 +48,13 @@ def approx_trap_region(OD_img, padding = 5):
 
     @return A slicer for OD image, representing the trap region.
     """
-    rects = find_rect(OD_img)
-    assert len(rects) == 1
-    x, y, w, h = rects[0]
-    b = padding
-    return (
-        slice(y - b, y + h + b),
-        slice(x - b, x + w + b),
-    )
+    # rects = find_rect(OD_img)
+    # assert len(rects) == 1
+    # x, y, w, h = rects[0]
+    # b = padding
+    # return (
+    #     slice(y - b, y + h + b),
+    #     slice(x - b, x + w + b),
+    # )
+    x, y = find_brightest_square(OD_img, size)
+    return [slice(0, int(x), 1), slice(0, int(y), 1)]

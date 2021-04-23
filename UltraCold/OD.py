@@ -184,7 +184,7 @@ def get_trap_image(ods):
     except:
         raise
     for od in ods:
-        yield od[trap_region]
+        yield od[tuple(trap_region)]
 
             
                 
