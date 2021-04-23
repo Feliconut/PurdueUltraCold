@@ -39,10 +39,10 @@ for ods, dataset_id in OD.iter_through_dir(mode='group'):
     odfftavg = np.mean(ods_fft, axis=0)
     # adjust the size to 128 * 128
 
-    W, H = np.shape(odfftavg)
-    if abs(W - H) / (W + H) > 0.1:
-        print(f'id{dataset_id} do not have square-like trap region. Reject.')
-        continue
+    # W, H = np.shape(odfftavg)
+    # if abs(W - H) / (W + H) > 0.1:
+    #     print(f'id{dataset_id} do not have square-like trap region. Reject.')
+    #     continue
 
     def cropND(img, bounding):
         start = tuple(map(lambda a, da: a // 2 - da // 2, img.shape, bounding))
@@ -79,7 +79,7 @@ for ods, dataset_id in OD.iter_through_dir(mode='group'):
 
     # map the clipped image to [-1,1]
     # standardization
-    od_cutoff = sum((map(get_vmax), ods_fft)) / len(ods)
+    od_cutoff = sum((map(get_vmax, ods_fft))) / len(ods)
     fftavg_cutoff = get_vmax(odfftavg)
     new_src_list = list(
         map(lambda od_fft: np.clip(od_fft * 2 / od_cutoff - 1, -1, 1),
@@ -89,13 +89,13 @@ for ods, dataset_id in OD.iter_through_dir(mode='group'):
 
     img_iter = zip(ods, new_src_list, new_tar_list)
     while True:
-        # rawinput = input(
-        #     'C = next image if possible, A = accept current dataset, D = decline current dataset, E = exit'
-        # )
-        accepted_ids = set(
-            '031550,051352,051624,051649,141001,141147,141153,141201,141206,141902,151033,151038,151413,151418,191428,191433,191439,191444,191450,191454,191457,211412,211455,211503,211508,211513,221119,221124,221524,221529'
-            .split(','))
-        rawinput = 'A' if dataset_id in accepted_ids else 'D'
+        rawinput = input(
+            'C = next image if possible, A = accept current dataset, D = decline current dataset, E = exit'
+        )
+        # accepted_ids = set(
+        #     '031550,051352,051624,051649,141001,141147,141153,141201,141206,141902,151033,151038,151413,151418,191428,191433,191439,191444,191450,191454,191457,211412,211455,211503,211508,211513,221119,221124,221524,221529'
+        #     .split(','))
+        # rawinput = 'A' if dataset_id in accepted_ids else 'D'
         if rawinput == 'C' or rawinput == '':
             try:
                 od, srcimg, tarimg = next(img_iter)

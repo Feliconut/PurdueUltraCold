@@ -303,3 +303,8 @@ train(d_model, g_model, gan_model, (src, tar))
 # summarize_performance(1268, g_model, dataset)
 g_model.save('model_256_x100_1268.h5')
 # %%
+image_shape = all_dataset[0][500:].shape
+src, tar = (all_dataset[0][500:].reshape(
+    (*image_shape, 1)), all_dataset[1][500:].reshape((*image_shape, 1)))
+res = g_model.predict(src)
+# %%
