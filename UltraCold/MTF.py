@@ -1,3 +1,4 @@
+from _plotly_utils.basevalidators import is_numpy_convertable
 import numpy as np
 from scipy.optimize.minpack import curve_fit
 from typing_extensions import TypedDict
@@ -85,7 +86,45 @@ def mtf(K_X, K_Y, d, tau, S0, alpha, phi, beta, delta_s):
     return M2k
 
 
-def fit(M2k_Exp, imgSysData, paras_guess=None, paras_bounds=None, dict_format = False):
+def make_M2k_Fit(paras, imgSysData, shape=(100, 100)):
+    "authored by Eric."
+
+    default_paras = [1, 1, 1, 1, 1.5, 1, 3]
+
+    if paras is None:
+        paras = default_paras
+    paras = [i if i is not None else j for i, j in zip(paras, default_paras)]
+    if imgSysData is None:
+        imgSysData = {
+            "CCDPixelSize": 13,  # pixel size of the CCD, in micron 
+            "magnification":
+            27,  # 799.943 / 29.9099, # magnification of the imaging system 
+            "wavelen": 0.852,  # wavelength of the imaging beam, in micron 
+            "NA": 0.37,  # numerical aperture of the objective 
+            "ODtoAtom": 13
+        }
+
+    A, tau, S0, alpha, phi, beta, delta_s = paras
+    _, _, K_X, K_Y = get_freq(imgSysData["CCDPixelSize"],
+                              imgSysData["magnification"], shape)
+    d = imgSysData["wavelen"] / (2 * np.pi * imgSysData["NA"])
+    R_p, Theta_p = np.abs(K_X + 1j * K_Y) * d, np.angle(K_X + 1j * K_Y)
+    p1 = pupil_func(R_p, Theta_p + np.pi, tau, S0, alpha, phi, beta)
+    p2 = np.conj(pupil_func(R_p, Theta_p, tau, S0, alpha, phi, beta)) * \
+            np.exp(-2*1j*delta_s)
+    PSF = (p1 + p2) / (2 * np.cos(delta_s))
+    M2k = np.abs(PSF)**2
+    M2k_Fit = A * M2k
+    M2k_Fit[M2k_Fit.shape[0] // 2, M2k_Fit.shape[1] // 2] = 0
+
+    return M2k_Fit
+
+
+def fit(M2k_Exp,
+        imgSysData,
+        paras_guess=None,
+        paras_bounds=None,
+        dict_format=False):
     """
     Fit the imaging response function using the model provided in 
     Chen-Lung Hung et al. 2011 New J. Phys. 13 075019
@@ -155,13 +194,13 @@ def fit(M2k_Exp, imgSysData, paras_guess=None, paras_bounds=None, dict_format = 
             'beta_fit': beta_fit,
             'delta_s_fit': delta_s_fit,
             'd': d,
-            'kx':k_x,
-            'ky':k_y,
-            'Kx':K_x,
-            'Ky':K_y,
-            'pcov':pcov
+            'kx': k_x,
+            'ky': k_y,
+            'Kx': K_x,
+            'Ky': K_y,
+            'pcov': pcov
         }
-        res = {'M2k':M2k_Fit, 'params':params, 'rms':rms_min}
+        res = {'M2k': M2k_Fit, 'params': params, 'rms': rms_min}
         return res
 
     return M2k_Fit, rms_min, popt, pcov, k_x, k_y, K_x, K_y, d
