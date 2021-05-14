@@ -101,20 +101,22 @@ def visualize(atomOD, X=None, Y=None, axes=None, cMap=cm.jet, vRange=None):
 
     if X == None or Y == None:
         if vRange == None:
-            pc_atom = ax_atom.pcolor(atomOD, cmap=cMap)
+            pc_atom = ax_atom.pcolor(atomOD, cmap=cMap, shading='auto')
         else:
             pc_atom = ax_atom.pcolor(atomOD, cmap=cMap, \
                 vmin=max(vRange[0], atomOD.min()), \
-                vmax=min(vRange[1], atomOD.max()))
+                vmax=min(vRange[1], atomOD.max()),
+                shading='auto')
         ax_atom.set_xlabel('$x$ (px)')
         ax_atom.set_ylabel('$y$ (px)')
     else:
         if vRange == None:
-            pc_atom = ax_atom.pcolor(X, Y, atomOD, cmap=cMap)
+            pc_atom = ax_atom.pcolor(X, Y, atomOD, cmap=cMap, shading='auto')
         else:
             pc_atom = ax_atom.pcolor(X, Y, atomOD, cmap=cMap, \
                 vmin=max(vRange[0], atomOD.min()), \
-                vmax=min(vRange[1], atomOD.max()))
+                vmax=min(vRange[1], atomOD.max()),
+                shading='auto')
         ax_atom.set_xlabel('$x$ ($\\mu$m)')
         ax_atom.set_ylabel('$y$ ($\\mu$m)')
     plt.colorbar(pc_atom, extend='both')
@@ -154,7 +156,6 @@ def iter_through_dir(DATA_DIR='DATA',
         print(f'id: {dataset_id}, #img: {len(ods)}')
         if not len(ods): continue
 
-
         # determine noise regions
         if auto_trap:
             try:
@@ -193,7 +194,6 @@ def get_dataset(dataset_id,
     ods, _, _ = from_image_dir(dataset_path)
     print(f'id: {dataset_id}, #img: {len(ods)}')
     if not len(ods): return
-
 
     # get_trap_image = lambda x: get_trap_image(x, trap_size=trap_size)
 

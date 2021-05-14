@@ -30,7 +30,7 @@ def visualize2d(S, K_X, K_Y):
     S[S == S.max()] = 0
     fig_S2d = plt.figure()
     ax_S2d = fig_S2d.add_subplot(111)
-    pc = ax_S2d.pcolor(K_X, K_Y, S, cmap=cm.jet)
+    pc = ax_S2d.pcolor(K_X, K_Y, S, cmap=cm.jet, shading='auto')
     plt.colorbar(pc)
     ax_S2d.set_aspect(1)
     ax_S2d.set_xlabel('$k_x$ ($\\mu$m$^{-1}$)')

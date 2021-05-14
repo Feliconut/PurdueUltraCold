@@ -12,6 +12,7 @@ def get_freq(CCDPixelSize, magnification, M2k_mat_shape):
     px_y = 1.0 * pixelSize  # micron
     sampleNum_y, sampleNum_x = M2k_mat_shape
 
+    # FT from real space to k space  
     k_x = np.fft.fftshift(np.fft.fftfreq(sampleNum_x, px_x)) * 2 * np.pi
     k_y = np.fft.fftshift(np.fft.fftfreq(sampleNum_y, px_y)) * 2 * np.pi
 

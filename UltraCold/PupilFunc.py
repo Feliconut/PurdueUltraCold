@@ -64,7 +64,8 @@ def visualize(tau_fit,
                                np.angle(pupilplt),
                                cmap=cm.twilight_shifted,
                                vmin=-np.pi,
-                               vmax=np.pi)
+                               vmax=np.pi,
+                               shading='auto')
     ax_pupil.set_aspect(1)
     ax_pupil.set_title('Phase of exit pupil (radian)')
     ax_pupil.axis('off')
@@ -76,7 +77,8 @@ def visualize(tau_fit,
     pc_pupil_2 = ax_pupil_2.pcolor(X_pupilplt,
                                    Y_pupilplt,
                                    np.angle(pupilplt),
-                                   cmap=cm.RdYlGn)
+                                   cmap=cm.RdYlGn,
+                                   shading='auto')
     ax_pupil_2.set_aspect(1)
     ax_pupil_2.set_title('Phase of exit pupil (radian)')
     ax_pupil_2.axis('off')

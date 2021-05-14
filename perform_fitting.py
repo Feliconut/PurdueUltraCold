@@ -68,6 +68,7 @@ def fit(M2k_Exp, imgSysData=imgSysData, saveDir=None):
     params['saveDir'] = saveDir
     return fit_visualizations(params, M2k_Exp, M2k_Fit)
 
+
     # NPS.visualize_exp_fit(M2k_Exp, **params, M2k_Fit=M2k_Fit)
     # NPS.visualize_line_cut(M2k_Exp, **params, M2k_Fit=M2k_Fit)
     # %%
@@ -77,25 +78,38 @@ def fit_visualizations(params, M2k_Exp, M2k_Fit):
                                     fplot_PSF_LineCut, fplot_pupil,
                                     fplot_NPS_ExpAndFit_LineCut)
 
-    return (
-        fplot_pupil(**params),
-        fplot_PSF(**params),
-        fplot_PSF_LineCut(**params),
-        fplot_PSF_abs2(**params),
-        fplot_PSF_abs2_LineCut(**params),
-        # resolution, _1, _2 =
-        # print("The Rayleigh-criterion resolution is approximately {:.1f} micron".
-        #       format(resolution))
-        fplot_NPS_ExpAndFit(
-            M2k_Exp,
-            **params,
-            M2k_Fit=M2k_Fit,
-        ),
-        fplot_NPS_ExpAndFit_LineCut(
-            M2k_Exp,
-            **params,
-            M2k_Fit=M2k_Fit,
-        ))
+    fplot_pupil(**params)
+    plt.cla()
+    plt.clf()
+    fplot_PSF(**params)
+    plt.cla()
+    plt.clf()
+    fplot_PSF_LineCut(**params)
+    plt.cla()
+    plt.clf()
+    fplot_PSF_abs2(**params)
+    plt.cla()
+    plt.clf()
+    fplot_PSF_abs2_LineCut(**params)
+    plt.cla()
+    plt.clf()
+    # resolution, _1, _2 =
+    # print("The Rayleigh-criterion resolution is approximately {:.1f} micron".
+    #       format(resolution))
+    fplot_NPS_ExpAndFit(
+        M2k_Exp,
+        **params,
+        M2k_Fit=M2k_Fit,
+    )
+    plt.cla()
+    plt.clf()
+    fplot_NPS_ExpAndFit_LineCut(
+        M2k_Exp,
+        **params,
+        M2k_Fit=M2k_Fit,
+    )
+    plt.cla()
+    plt.clf()
 
 
 # %%

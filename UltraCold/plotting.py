@@ -44,7 +44,13 @@ def fplot_PSF(tau_fit,
     fig_PSF = plt.figure('PSF', figsize=(6, 4.5))
     ax_PSF = fig_PSF.add_subplot(111)
     MM = np.max([np.abs(PSF.max()), np.abs(PSF.min())])
-    pc_PSF = ax_PSF.pcolor(X, Y, PSF, cmap=cm.bwr, vmin=-MM, vmax=MM)
+    pc_PSF = ax_PSF.pcolor(X,
+                           Y,
+                           PSF,
+                           cmap=cm.bwr,
+                           vmin=-MM,
+                           vmax=MM,
+                           shading='auto')
     ax_PSF.set_aspect(1)
     ax_PSF.set_xlim([-10, 10])
     ax_PSF.set_ylim([-10, 10])
@@ -156,7 +162,13 @@ def fplot_PSF_abs2(tau_fit,
     fig_PSF_abs2 = plt.figure('PSF_abs2', figsize=(6, 4.5))
     ax_PSF_abs2 = fig_PSF_abs2.add_subplot(111)
     MM = np.max([np.abs(PSF.max()), np.abs(PSF.min())])
-    pc = ax_PSF_abs2.pcolor(X, Y, PSF, cmap=cm.bwr, vmin=-MM, vmax=MM)
+    pc = ax_PSF_abs2.pcolor(X,
+                            Y,
+                            PSF,
+                            cmap=cm.bwr,
+                            vmin=-MM,
+                            vmax=MM,
+                            shading='auto')
     ax_PSF_abs2.set_aspect(1)
     ax_PSF_abs2.set_xlim([-10, 10])
     ax_PSF_abs2.set_ylim([-10, 10])

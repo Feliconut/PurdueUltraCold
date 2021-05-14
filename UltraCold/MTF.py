@@ -104,6 +104,20 @@ def make_M2k_Fit(
     @param paras: A sequence of MTF parameters. 
     [A, tau, S0, alpha, phi, beta, delta_s]
 
+        
+    The physical meaning of three key parameters are listed below:
+    
+    Alpha – astigmatism : 
+        determine the ellipticity of the ring (0 means perfect circle)
+    Phi – angle: 
+        determine the axis of ellipse
+    Defocus - beta: 
+        determine the ripple in the ring
+    delta_S, S0: 
+        should be near 0 (or 1) because currently the system is roughly aligned.
+    tau:
+        should be the aperture, around 0.8
+
     @param imgSysData: image system data in its standard format.
 
     @param shape the shape of output image. Should be a 2d square.
@@ -123,10 +137,12 @@ def make_M2k_Fit(
     _, _, K_X, K_Y = get_freq(imgSysData["CCDPixelSize"],
                               imgSysData["magnification"], shape)
     d = imgSysData["wavelen"] / (2 * np.pi * imgSysData["NA"])
+    #p = (K_X + 1j * K_Y) * d
     R_p, Theta_p = np.abs(K_X + 1j * K_Y) * d, np.angle(K_X + 1j * K_Y)
     p1 = pupil_func(R_p, Theta_p + np.pi, tau, S0, alpha, phi, beta)
     p2 = np.conj(pupil_func(R_p, Theta_p, tau, S0, alpha, phi, beta)) * \
-            np.exp(-2*1j*delta_s)
+            np.exp(-2*1j*delta_s) # 2j*delta_s is the phase difference
+    # Eqn.(A.(4)), Hung 2011, "Extracting"
     PSF = (p1 + p2) / (2 * np.cos(delta_s))
     M2k = np.abs(PSF)**2
     M2k_Fit = A * M2k

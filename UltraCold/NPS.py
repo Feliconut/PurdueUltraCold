@@ -22,7 +22,7 @@ def _an_from_od(OD, imgSysData=None):
     return AtomNum
 
 
-def from_od(ODs, OD_avg = None, norm=True, imgSysData=None):
+def from_od(ODs, OD_avg=None, norm=True, imgSysData=None):
     """
     Calculate the noise power spectrum (NPS), from a set of images and their
     average. Note that `ODs` is considered as an ensemble, which means each
@@ -43,7 +43,7 @@ def from_od(ODs, OD_avg = None, norm=True, imgSysData=None):
     """
     NPSs = []
     if OD_avg is None:
-        OD_avg = np.mean(ODs, axis=0) 
+        OD_avg = np.mean(ODs, axis=0)
     for OD in ODs:
         noise = OD - OD_avg
         if norm: noise = _an_from_od(noise, imgSysData)
@@ -59,7 +59,7 @@ def visualize(NPS, K_X, K_Y):
     NPS[NPS == NPS.max()] = 0
     fig_NPS = plt.figure()
     ax_NPS = fig_NPS.add_subplot(111)
-    pc = ax_NPS.pcolor(K_X, K_Y, NPS, cmap=cm.jet)
+    pc = ax_NPS.pcolor(K_X, K_Y, NPS, cmap=cm.jet, shading='auto')
     plt.colorbar(pc)
     ax_NPS.set_aspect(1)
     ax_NPS.set_xlabel('$k_x$ ($\\mu$m$^{-1}$)')
@@ -78,14 +78,19 @@ def visualize_exp(M2k_Exp, K_x, K_y, axes=None, cMap=cm.jet, vRange=None):
     else:
         ax_NPS_Exp = axes
     if vRange == None:
-        pc_NPS_Exp = ax_NPS_Exp.pcolor(K_x, K_y, M2k_Exp, cmap=cMap)
+        pc_NPS_Exp = ax_NPS_Exp.pcolor(K_x,
+                                       K_y,
+                                       M2k_Exp,
+                                       cmap=cMap,
+                                       shading='auto')
     else:
         pc_NPS_Exp = ax_NPS_Exp.pcolor(K_x,
                                        K_y,
                                        M2k_Exp,
                                        cmap=cMap,
                                        vmin=vRange[0],
-                                       vmax=vRange[1])
+                                       vmax=vRange[1],
+                                       shading='auto')
     plt.colorbar(pc_NPS_Exp)
     ax_NPS_Exp.set_aspect(1)
     ax_NPS_Exp.set_title("Noise Power Spectrum (Exp.)")
@@ -124,7 +129,8 @@ def visualize_exp_fit(M2k_Exp,
                                    M2k_Exp,
                                    cmap=cMap,
                                    vmin=vMin_Exp,
-                                   vmax=vMax_Exp)
+                                   vmax=vMax_Exp,
+                                   shading='auto')
     divider = make_axes_locatable(ax_NPS_Exp)
     cax = divider.append_axes("right", size="5%", pad=0.1)
     plt.colorbar(pc_NPS_Exp, cax=cax, extend='both')
@@ -139,7 +145,8 @@ def visualize_exp_fit(M2k_Exp,
                                    M2k_Fit,
                                    cmap=cMap,
                                    vmin=vMin_Fit,
-                                   vmax=vMax_Fit)
+                                   vmax=vMax_Fit,
+                                   shading='auto')
     divider = make_axes_locatable(ax_NPS_Fit)
     cax = divider.append_axes("right", size="5%", pad=0.1)
     plt.colorbar(pc_NPS_Fit, cax=cax, extend='both')
@@ -150,13 +157,7 @@ def visualize_exp_fit(M2k_Exp,
     return fig_NPS, ax_NPS_Exp, ax_NPS_Fit
 
 
-def visualize_line_cut(
-    M2k_Exp,
-    k_x,
-    k_y,
-    M2k_Fit,
-    **kwargs
-):
+def visualize_line_cut(M2k_Exp, k_x, k_y, M2k_Fit, **kwargs):
     """
     Plot noise power spectrum - line cut
     """

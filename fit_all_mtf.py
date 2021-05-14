@@ -49,12 +49,13 @@ def generic_plot(img,
                  cm=cm.jet,
                  name="Untitled",
                  title="Untitled"):
+    plt.cla()
+    plt.clf()
     plt.imshow(img, cm, vmin=vmin, vmax=vmax)
     plt.title(title)
-    plt.legend()
+    # plt.legend()
     plt.colorbar()
     plt.savefig(SAVE_DIR + '/' + name)
-    plt.close()
 
 
 def get_percentile_cut(img, q, two_tailed=False):
@@ -73,6 +74,8 @@ def plot_od(od, od_id, dataset_id, **kwargs):
     title = f"OD-{dataset_id}#{od_id}"
     name = f"{dataset_id}/{title}"
     generic_plot(od, vmin, vmax, name=name, title=title, **kwargs)
+
+
 def plot_mtf(od, od_id, dataset_id, **kwargs):
     vmax = get_percentile_cut(od, 99.65, two_tailed=False)
     title = f"MTF-{dataset_id}#{od_id}"
@@ -123,6 +126,8 @@ for ods, dataset_id in OD.iter_through_dir(mode='group', auto_trap=True):
     # print(params)
     params['saveDir'] = saveDir
     fit_visualizations(params, M2k_Exp, M2k_Fit)
+    plt.clf()
+    plt.cla()
 
     # plot OD fft fit
     try:
@@ -130,9 +135,19 @@ for ods, dataset_id in OD.iter_through_dir(mode='group', auto_trap=True):
     except:
         pass
 
-    pass
+    with open(join(saveDir, "fit.txt"), 'w+') as f:
+        lines = [
+            f"A = {params['A_fit']}", \
+            f"tau = {params['tau_fit']}", \
+            f"S0 = {params['S0_fit']}", \
+            f"alpha = {params['alpha_fit']}", \
+            f"phi = {params['phi_fit']}", \
+            f"beta = {params['beta_fit']}", \
+            f"delta_s = {params['delta_s_fit']}" \
+        ]
+        f.write('\n'.join(lines))
 
-    
+
 # %%
 
 # %%
