@@ -5,7 +5,7 @@ from matplotlib.ticker import MultipleLocator
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from .PupilFunc import pupil_func, visualize as fplot_pupil
-from .NPS import visualize_exp_fit as fplot_NPS_ExpAndFit
+from .NPS import visualize_exp_fit as fplot_NPS_ExpAndFit, visualize_line_cut as fplot_NPS_ExpAndFit_LineCut
 
 
 def fplot_PSF(tau_fit,
@@ -15,7 +15,6 @@ def fplot_PSF(tau_fit,
               beta_fit,
               delta_s_fit,
               d,
-              if_Save=False,
               saveDir=None,
               **kwargs):
     """
@@ -53,7 +52,7 @@ def fplot_PSF(tau_fit,
     ax_PSF.set_xlabel('$x$ in object plane ($\\mu$m)')
     ax_PSF.set_ylabel('$y$ in object plane ($\\mu$m)')
     plt.colorbar(pc_PSF)
-    if if_Save:
+    if saveDir:
         plt.savefig(saveDir + "\\PSF.png", dpi='figure')
     return fig_PSF, ax_PSF
 
@@ -113,7 +112,7 @@ def fplot_PSF_LineCut(tau_fit,
     ax_PSF_LineCut.legend()
     ax_PSF_LineCut.grid(True)
     ax_PSF_LineCut.set_xlim([-10, 10])
-    if if_Save:
+    if saveDir:
         plt.savefig(saveDir + "\\PSF_LineCut.png", dpi='figure')
     return fig_PSF_LineCut, ax_PSF_LineCut
 
@@ -165,7 +164,7 @@ def fplot_PSF_abs2(tau_fit,
     ax_PSF_abs2.set_xlabel('$x$ in object plane ($\\mu$m)')
     ax_PSF_abs2.set_ylabel('$y$ in object plane ($\\mu$m)')
     plt.colorbar(pc)
-    if if_Save:
+    if saveDir:
         plt.savefig(saveDir + "\\PSF_abs2.png", dpi='figure')
     return fig_PSF_abs2, ax_PSF_abs2
 
@@ -247,7 +246,7 @@ def fplot_PSF_abs2_LineCut(tau_fit,
     ax_PSF_abs2_LineCut.grid(True)
     ax_PSF_abs2_LineCut.set_xlim([-10, 10])
     ax_PSF_abs2_LineCut.set_xlabel('$x$ in object plane ($\\mu$m)')
-    if if_Save:
+    if saveDir:
         plt.savefig(saveDir + "\\PSF_abs2_LineCut.png", dpi='figure')
 
     resolution, b, a, h = calcResolution(PSF[cind, :], X[cind, :])

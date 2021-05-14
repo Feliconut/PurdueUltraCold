@@ -86,25 +86,40 @@ def mtf(K_X, K_Y, d, tau, S0, alpha, phi, beta, delta_s):
     return M2k
 
 
-def make_M2k_Fit(paras, imgSysData, shape=(100, 100)):
-    "authored by Eric."
-
-    default_paras = [1, 1, 1, 1, 1.5, 1, 3]
-
-    if paras is None:
-        paras = default_paras
-    paras = [i if i is not None else j for i, j in zip(paras, default_paras)]
-    if imgSysData is None:
-        imgSysData = {
+def make_M2k_Fit(
+        paras,
+        imgSysData={
             "CCDPixelSize": 13,  # pixel size of the CCD, in micron 
             "magnification":
             27,  # 799.943 / 29.9099, # magnification of the imaging system 
             "wavelen": 0.852,  # wavelength of the imaging beam, in micron 
             "NA": 0.37,  # numerical aperture of the objective 
             "ODtoAtom": 13
-        }
+        },
+        shape=(100, 100),
+        default_paras=[1, 1, 1, 1, 1.5, 1, 3]):
+    """
+    Generate an MTF image with given parameters.
+    
+    @param paras: A sequence of MTF parameters. 
+    [A, tau, S0, alpha, phi, beta, delta_s]
+
+    @param imgSysData: image system data in its standard format.
+
+    @param shape the shape of output image. Should be a 2d square.
+
+    @return an MTF image.
+
+    @author Eric.
+    """
+
+    if paras is None:
+        paras = default_paras
+    # replace None entries with default value
+    paras = [i if i is not None else j for i, j in zip(paras, default_paras)]
 
     A, tau, S0, alpha, phi, beta, delta_s = paras
+
     _, _, K_X, K_Y = get_freq(imgSysData["CCDPixelSize"],
                               imgSysData["magnification"], shape)
     d = imgSysData["wavelen"] / (2 * np.pi * imgSysData["NA"])
@@ -194,10 +209,10 @@ def fit(M2k_Exp,
             'beta_fit': beta_fit,
             'delta_s_fit': delta_s_fit,
             'd': d,
-            'kx': k_x,
-            'ky': k_y,
-            'Kx': K_x,
-            'Ky': K_y,
+            'k_x': k_x,
+            'k_y': k_y,
+            'K_x': K_x,
+            'K_y': K_y,
             'pcov': pcov
         }
         res = {'M2k': M2k_Fit, 'params': params, 'rms': rms_min}

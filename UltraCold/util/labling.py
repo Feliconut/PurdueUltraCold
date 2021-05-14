@@ -58,4 +58,4 @@ def approx_trap_region(OD_img, size=100):
     #     slice(x - b, x + w + b),
     # )
     x, y = find_brightest_square(OD_img, size)
-    return [slice(0, int(x), 1), slice(0, int(y), 1)]
+    return [slice(int(x), int(x + size), 1), slice(int(y), int(y + size), 1)]

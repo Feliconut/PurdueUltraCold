@@ -84,14 +84,9 @@ def from_image_dir(imgDir,
         ODs_atom.append(OD_atom)
         ODs_noise.append(OD_noise)
 
-    # ODs_atom_avg = np.nan_to_num(sum(ODs_atom) / len(ODs_atom))
-    # ODs_noise_avg = np.nan_to_num(sum(ODs_noise) / len(ODs_noise))
-
-    # OD_data = (ODs_atom, ODs_atom_avg, ODs_noise, ODs_noise_avg)
     img_index_range = imgIndexMin, imgIndexMax
 
     return ODs_atom, ODs_noise, img_index_range
-    # return OD_data, img_index_range
 
 
 def visualize(atomOD, X=None, Y=None, axes=None, cMap=cm.jet, vRange=None):
@@ -127,11 +122,15 @@ def visualize(atomOD, X=None, Y=None, axes=None, cMap=cm.jet, vRange=None):
     ax_atom.set_title("2D thermal gas (OD)")
     return fig_atom, ax_atom
 
+
 from os import listdir
 from os.path import join
 
 
-def iter_through_dir(DATA_DIR = 'DATA', auto_trap = True,mode='flat'):
+def iter_through_dir(DATA_DIR='DATA',
+                     auto_trap=True,
+                     mode='flat',
+                     trap_size=100):
     """
     @brief Iterate through a data directory with many datasets in separate folders.
     
@@ -147,6 +146,7 @@ def iter_through_dir(DATA_DIR = 'DATA', auto_trap = True,mode='flat'):
     `(od, dataset_id, index_in_dataset)` for `flat`, and
     `(ods, dataset_id)` for `group`.
     """
+    # get_trap_image = lambda x: get_trap_image(x, trap_size=trap_size)
     for dataset_id in listdir(DATA_DIR):
         if '.' in dataset_id: continue
         dataset_path = join(DATA_DIR, dataset_id)
@@ -154,8 +154,6 @@ def iter_through_dir(DATA_DIR = 'DATA', auto_trap = True,mode='flat'):
         print(f'id: {dataset_id}, #img: {len(ods)}')
         if not len(ods): continue
 
-        # od_mean = np.mean(ods, axis=0)
-        # od_var = np.mean([(od - od_mean)**2 for od in ods], axis=0)
 
         # determine noise regions
         if auto_trap:
@@ -168,33 +166,36 @@ def iter_through_dir(DATA_DIR = 'DATA', auto_trap = True,mode='flat'):
             except:
                 print(f'id: {dataset_id} skipped due to bad trap region')
             continue
-        # noise_regions = pack(od_mean.shape, DATA_SIZE,
-        #                      (trap_x.start, trap_y.start, trap_x.stop -
-        #                       trap_x.start, trap_y.stop - trap_y.start))
         else:
             if mode == 'flat':
-                for i, od in enumerate(ods): yield od, dataset_id, i
+                for i, od in enumerate(ods):
+                    yield od, dataset_id, i
             elif mode == 'group':
                 yield ods, dataset_id
 
-def get_trap_image(ods):
+
+def get_trap_image(ods, trap_size=100):
     od_mean = np.mean(ods, axis=0)
     try:
-        trap_region = approx_trap_region(od_mean, 5)
+        trap_region = approx_trap_region(od_mean, trap_size)
     except:
         raise
     for od in ods:
         yield od[tuple(trap_region)]
 
-            
-def get_dataset(dataset_id, auto_trap = True,mode='flat',DATA_DIR = "DATA"):
+
+def get_dataset(dataset_id,
+                auto_trap=True,
+                mode='flat',
+                DATA_DIR="DATA",
+                trap_size=100):
     dataset_path = join(DATA_DIR, dataset_id)
     ods, _, _ = from_image_dir(dataset_path)
     print(f'id: {dataset_id}, #img: {len(ods)}')
     if not len(ods): return
 
-    # od_mean = np.mean(ods, axis=0)
-    # od_var = np.mean([(od - od_mean)**2 for od in ods], axis=0)
+
+    # get_trap_image = lambda x: get_trap_image(x, trap_size=trap_size)
 
     # determine noise regions
     if auto_trap:
@@ -206,14 +207,10 @@ def get_dataset(dataset_id, auto_trap = True,mode='flat',DATA_DIR = "DATA"):
                 yield list(get_trap_image(ods)), dataset_id
         except:
             print(f'id: {dataset_id} skipped due to bad trap region')
-        
-    # noise_regions = pack(od_mean.shape, DATA_SIZE,
-    #                      (trap_x.start, trap_y.start, trap_x.stop -
-    #                       trap_x.start, trap_y.stop - trap_y.start))
+
     else:
         if mode == 'flat':
-            for i, od in enumerate(ods): yield od, dataset_id, i
+            for i, od in enumerate(ods):
+                yield od, dataset_id, i
         elif mode == 'group':
             yield ods, dataset_id
-
- 

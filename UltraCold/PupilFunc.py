@@ -2,6 +2,7 @@ from matplotlib import pyplot as plt
 from matplotlib import cm
 from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 import numpy as np
+from numpy.lib.npyio import save
 
 
 def pupil_func(R_p, Theta_p, tau, S0, alpha, phi, beta):
@@ -38,7 +39,6 @@ def visualize(tau_fit,
               alpha_fit,
               phi_fit,
               beta_fit,
-              if_Save=False,
               saveDir=None,
               **kwargs):
     """
@@ -83,6 +83,6 @@ def visualize(tau_fit,
     divider = make_axes_locatable(ax_pupil_2)
     cax = divider.append_axes("right", size="5%", pad=0.2)
     plt.colorbar(pc_pupil_2, cax=cax)
-    if if_Save:
+    if saveDir:
         plt.savefig(saveDir + "\\Pupil.png", dpi='figure')
     return fig_pupil, ax_pupil, ax_pupil_2
