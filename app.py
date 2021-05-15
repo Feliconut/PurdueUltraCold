@@ -2,6 +2,7 @@
 Goal: being able to generate fake NPS one at a time, using Eric's code.
 
 """
+# from functools import lru_cache
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -11,10 +12,6 @@ import numpy as np
 
 import pandas as pd
 from UltraCold.MTF import make_M2k_Fit
-
-df = pd.read_csv(
-    'https://raw.githubusercontent.com/plotly/datasets/master/gapminderDataFiveYear.csv'
-)
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -84,13 +81,13 @@ app.layout = html.Div(
             }),
         html.Div([]),
         html.Div(children=[
-            *make_slider('A', -10, 10, 1),
-            *make_slider('tau', -0.5, 10, 0.8),
+            *make_slider('A', 0, 10, 1),
+            *make_slider('tau', 0.2, 2, 0.8),
             *make_slider('S0', -20, 20, 0),
-            *make_slider('alpha', -20, 20, 1),
-            *make_slider('phi', -np.pi, np.pi, 1.5),
-            *make_slider('beta', -30, 30, 1),
-            *make_slider('delta_s', -np.pi, np.pi, 3),
+            *make_slider('alpha', -20, 20, 0),
+            *make_slider('phi', -np.pi, np.pi, 0),
+            *make_slider('beta', -30, 30, 0),
+            *make_slider('delta_s', -np.pi, np.pi, 0),
         ],
                  style={
                      'right': '0px',
@@ -99,6 +96,8 @@ app.layout = html.Div(
     ],
     style={'display': 'flex'},
 )
+
+# cached_make_M2k_Fit = lru_cache(None)(make_M2k_Fit)
 
 
 @app.callback(
@@ -116,16 +115,18 @@ def update_figure(*para):
     # para_guess = [1, 1, 1, 1, 1.5, 1, 3]
 
     fig = px.imshow(
-        make_M2k_Fit(para, None),
-        -1,
-        1,
-        color_continuous_scale='RdBu_r',
+        make_M2k_Fit(para, ),
+        0, # vmin
+        para[0], # vmax
+        # color_continuous_scale='RdBu_r',
+        color_continuous_scale='jet',
     )
 
     fig.update_layout(transition_duration=100)
 
     return fig
 
+# TODO Export fitting parameters
 
 if __name__ == '__main__':
     app.run_server(debug=True)
