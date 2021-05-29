@@ -1,6 +1,7 @@
 from _plotly_utils.basevalidators import is_numpy_convertable
 import numpy as np
 from scipy.optimize.minpack import curve_fit
+from scipy.optimize import dual_annealing
 from typing_extensions import TypedDict
 
 from . import NPS
@@ -124,7 +125,6 @@ def make_M2k_Fit(
 
     @return an MTF image.
 
-    @author Eric.
     """
 
     if paras is None:
@@ -151,11 +151,16 @@ def make_M2k_Fit(
     return M2k_Fit
 
 
+def m2k_fit_cost_default(M2k_Exp_cut, M2k_Fit):
+    return np.sqrt(np.mean((M2k_Fit - M2k_Exp_cut)**2))
+
+
 def fit(M2k_Exp,
         imgSysData,
         paras_guess=None,
         paras_bounds=None,
-        dict_format=False):
+        dict_format=False,
+        m2k_fit_cost=m2k_fit_cost_default):
     """
     Fit the imaging response function using the model provided in 
     Chen-Lung Hung et al. 2011 New J. Phys. 13 075019
@@ -199,7 +204,13 @@ def fit(M2k_Exp,
                       axis=0)
     # leave out the center bright point
 
+    # fitting function
+
+    fcost = lambda fit, obs=M2k_Exp_cut: m2k_fit_cost(fit, obs)
+
     rms_min = np.inf
+
+    # Fit using curve fit
     for pg in paras_guess:
         popt_temp, pcov = curve_fit(f, xdata, ydata, \
                                 p0=pg, maxfev=50000, bounds=paras_bounds)
@@ -210,10 +221,24 @@ def fit(M2k_Exp,
         M2k_Fit = A_fit * mtf(K_x, K_y, d, tau_fit, \
                             S0_fit, alpha_fit, phi_fit, beta_fit, delta_s_fit)
 
-        rms = np.sqrt(np.mean((M2k_Fit - M2k_Exp_cut)**2))
+        rms = fcost(M2k_Fit)
         if rms < rms_min:
             rms_min = rms
             popt = popt_temp
+
+    # Fit using dual annealing
+    # mtf_fit = None
+    # pcov = 0
+    # def fit_cost(params):
+    #     nonlocal mtf_fit, pcov
+    #     # print(params)
+    #     mtf_fit = f((K_x, K_y), *params)
+    #     pcov = fcost(mtf_fit)
+    #     return pcov
+    # ret = dual_annealing(fit_cost, list(zip(*paras_bounds)))
+    # M2k_Fit = mtf_fit
+    # popt_temp = popt = ret.x
+    # A_fit, tau_fit, S0_fit, alpha_fit, phi_fit, beta_fit, delta_s_fit = popt_temp
 
     if dict_format:
         params = {

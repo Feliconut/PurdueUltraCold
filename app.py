@@ -88,6 +88,7 @@ app.layout = html.Div(
             *make_slider('phi', -np.pi, np.pi, 0),
             *make_slider('beta', -30, 30, 0),
             *make_slider('delta_s', -np.pi, np.pi, 0),
+            html.Div(id='params')
         ],
                  style={
                      'right': '0px',
@@ -102,6 +103,7 @@ app.layout = html.Div(
 
 @app.callback(
     Output('graph-with-slider', 'figure'),
+    Output('params','children'),
     Input('A-slider', 'drag_value'),
     Input('tau-slider', 'drag_value'),
     Input('S0-slider', 'drag_value'),
@@ -123,8 +125,9 @@ def update_figure(*para):
     )
 
     fig.update_layout(transition_duration=100)
+    param_text = repr(para)
 
-    return fig
+    return fig, param_text
 
 # TODO Export fitting parameters
 
