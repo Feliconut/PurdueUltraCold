@@ -6,11 +6,12 @@ Goal: being able to generate fake NPS one at a time, using Eric's code.
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output
-import plotly.express as px
 import numpy as np
+import plotly.express as px
+from dash.dependencies import Input, Output
+from dash.exceptions import PreventUpdate
+from dash_extensions import Monitor
 
-import pandas as pd
 from UltraCold.MTF import make_M2k_Fit
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -23,47 +24,68 @@ paras_bounds = ([-1000, 0.5, -20, -20, -np.pi, -30,
 
 
 def make_slider(name, min, max, value=0):
+    slider_id = name + '-slider'
+    input_id = name + '_input'
+    monitor_id = name + '_monitor'
+
     marks = {
         0: str(0),
         min: f"{min:.2f}",
         max: f"{max:.2f}",
     }
-    for v in np.linspace(min, max, 11):
-        marks.setdefault(v, f"{v:.2f}")
 
-    f = (lambda v, name=name: name + f" = {v:.2f}")
-    app.callback(
-        Output(name + '-output-container', 'children'),
-        Input(name + '-slider', 'value'),
-    )(f)
+    def sync_inputs(data):
+        # Get value and trigger id from monitor.
+        try:
+            probe = data["val"]
+            trigger_id, value = probe["trigger"]["id"], float(probe["value"])
+        except (TypeError, KeyError):
+            print(1)
+            raise PreventUpdate
+        # Do the appropriate update.
+        print(2)
+        # return value,value
+        if trigger_id == slider_id:
+            return dash.no_update, value
+        elif trigger_id == input_id:
+            return value, dash.no_update
 
-    f = (lambda v: v)
     app.callback(
-        Output(name + '-slider', 'value'),
-        Input(name + '_input', 'value'),
-    )(f)
+        Output(slider_id, "value"),
+        Output(input_id, "value"),
+        # Output(name + '-output-container', 'children')
+        Input(monitor_id, "data"))(sync_inputs)
 
     return (
         html.Div(id=name + '-output-container',
                  children=name,
                  style={'font-size': 'x-large'}),
-        html.Div([
-            dcc.Slider(
-                id=name + '-slider',
-                min=float(min),
-                max=float(max),
-                value=value,
-                step=0.01,
-                marks=marks,
-                updatemode='drag',
-            ),
-            dcc.Input(
-                id=name + '_input',
-                type="number",
-                value=value,
-                step=0.1,
-            )
-        ]),
+        Monitor(
+            [
+                html.Div([
+                    dcc.Slider(
+                        id=slider_id,
+                        min=float(min),
+                        max=float(max),
+                        value=value,
+                        step=0.01,
+                        marks=marks,
+                        updatemode='drag',
+                    ),
+                    dcc.Input(
+                        id=input_id,
+                        type="number",
+                        value=value,
+                        step=0.01,
+                    )
+                ])
+            ],
+            id=monitor_id,
+            probes=dict(val=[
+                dict(id=slider_id, prop="drag_value"),
+                dict(id=input_id, prop="value")
+            ]),
+        ),
         html.Div(children="_" * 50, ),
     )
 
@@ -81,10 +103,8 @@ app.layout = html.Div(
             }),
         html.Div([]),
         html.Div(children=[
-            *make_slider('A', 0, 10, 1),
-            *make_slider('tau', 0.2, 2, 0.8),
-            *make_slider('S0', -20, 20, 0),
-            *make_slider('alpha', -20, 20, 0),
+            *make_slider('A', 0, 10, 1), *make_slider('tau', 0.2, 2, 0.8),
+            *make_slider('S0', -20, 20, 0), *make_slider('alpha', -20, 20, 0),
             *make_slider('phi', -np.pi, np.pi, 0),
             *make_slider('beta', -30, 30, 0),
             *make_slider('delta_s', -np.pi, np.pi, 0),
@@ -103,7 +123,7 @@ app.layout = html.Div(
 
 @app.callback(
     Output('graph-with-slider', 'figure'),
-    Output('params','children'),
+    Output('params', 'children'),
     Input('A-slider', 'drag_value'),
     Input('tau-slider', 'drag_value'),
     Input('S0-slider', 'drag_value'),
@@ -118,8 +138,8 @@ def update_figure(*para):
 
     fig = px.imshow(
         make_M2k_Fit(para, ),
-        0, # vmin
-        para[0], # vmax
+        zmin=0,  # vmin
+        zmax=para[0],  # vmax = A
         # color_continuous_scale='RdBu_r',
         color_continuous_scale='jet',
     )
@@ -128,6 +148,7 @@ def update_figure(*para):
     param_text = repr(para)
 
     return fig, param_text
+
 
 # TODO Export fitting parameters
 
