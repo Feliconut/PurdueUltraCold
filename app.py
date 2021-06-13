@@ -3,6 +3,7 @@ Goal: being able to generate fake NPS one at a time, using Eric's code.
 
 """
 # from functools import lru_cache
+from functools import lru_cache
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -11,6 +12,7 @@ import plotly.express as px
 from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
 from dash_extensions import Monitor
+from scipy.sparse import data
 
 from UltraCold.MTF import make_M2k_Fit
 
@@ -90,30 +92,63 @@ def make_slider(name, min, max, value=0):
     )
 
 
+ID_GRAPH_FIT = 'fit_graph_id'
+ID_GRAPH_EXP = 'exp_graph_id'
+
 app.layout = html.Div(
     [
         html.Title('MTF Playground'),
         # html.Div("Playground", style={"font-size": "xx-large"}),
-        dcc.Graph(
-            id='graph-with-slider',
+
+        html.Div([
+            dcc.Graph(
+            id=ID_GRAPH_FIT,
             style={
                 'left': '0px',
                 'width': '70%',
+                'height':'50%',
                 #  'display': 'unset';
             }),
-        html.Div([]),
+            dcc.Graph(
+            id=ID_GRAPH_EXP,
+            style={
+                'left': '0px',
+                'width': '70%',
+                'height':'50%',
+                #  'display': 'unset';
+            }),
+            ]
+                             ,style={
+                    #  'right': '0px',
+                     'width': '100%',
+                    #  'height':'50%',
+
+                 }
+                 ),
+            # html.Div([]),
         html.Div(children=[
-            *make_slider('A', 0, 10, 1), *make_slider('tau', 0.2, 2, 0.8),
-            *make_slider('S0', -20, 20, 0), *make_slider('alpha', -20, 20, 0),
-            *make_slider('phi', -np.pi, np.pi, 0),
-            *make_slider('beta', -30, 30, 0),
-            *make_slider('delta_s', -np.pi, np.pi, 0),
+            *make_slider('A', 0, 30, 1),\
+            *make_slider('tau', 0.2, 2, 0.8),\
+            *make_slider('S0', -20, 20, 0),\
+            *make_slider('alpha', -20, 20, 0),\
+            *make_slider('phi', -np.pi, np.pi, 0),\
+            *make_slider('beta', -30, 30, 0),\
+            *make_slider('delta_s', -np.pi, np.pi, 0),\
+            dcc.Input(
+                        id='dataset-id-input',
+                        type="text",
+                        value="dataset_id",
+                    ),\
+
             html.Div(id='params')
         ],
                  style={
                      'right': '0px',
-                     'width': '30%'
-                 })
+                     'width': '30%',
+                    #  'height':'50%',
+
+                 }
+                 )
     ],
     style={'display': 'flex'},
 )
@@ -122,7 +157,7 @@ app.layout = html.Div(
 
 
 @app.callback(
-    Output('graph-with-slider', 'figure'),
+    Output(ID_GRAPH_FIT, 'figure'),
     Output('params', 'children'),
     Input('A-slider', 'drag_value'),
     Input('tau-slider', 'drag_value'),
@@ -132,25 +167,58 @@ app.layout = html.Div(
     Input('beta-slider', 'drag_value'),
     Input('delta_s-slider', 'drag_value'),
 )
-def update_figure(*para):
-    print(para)
+def update_figure(*fit_param):
+    print(fit_param)
     # para_guess = [1, 1, 1, 1, 1.5, 1, 3]
 
     fig = px.imshow(
-        make_M2k_Fit(para, ),
+        make_M2k_Fit(fit_param, ),
         zmin=0,  # vmin
-        zmax=para[0],  # vmax = A
+        zmax=fit_param[0],  # vmax = A
         # color_continuous_scale='RdBu_r',
         color_continuous_scale='jet',
     )
 
-    fig.update_layout(transition_duration=100)
-    param_text = repr(para)
+    fig.update_layout()
+    param_text = repr(fit_param)
 
     return fig, param_text
 
+@lru_cache(maxsize=256)
+def get_mtf(dataset_id):
+    from UltraCold import OD, MTF
+    return MTF.from_ods(OD.from_dataset(dataset_id))
+
+@app.callback(
+    Output(ID_GRAPH_EXP, 'figure'),
+    Input('dataset-id-input', 'value'),
+    Input('A-slider', 'drag_value'),
+)
+def update_exp_figure(dataset_id, A):
+    try:
+        MTF_Exp =  get_mtf(dataset_id)
+        fig = px.imshow(
+            MTF_Exp,
+            zmin=0,  # vmin
+            zmax=A,  # vmax = A
+            # color_continuous_scale='RdBu_r',
+            color_continuous_scale='jet',
+        )
+
+        # fig.update_layout()
+        return fig
+
+    except FileNotFoundError:
+        return dash.no_update
+    
+        
 
 # TODO Export fitting parameters
+
+
+# TODO specify dataset ID
+# TODO click to fit
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)

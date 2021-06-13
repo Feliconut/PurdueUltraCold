@@ -1,16 +1,22 @@
-from _plotly_utils.basevalidators import is_numpy_convertable
 import numpy as np
-from scipy.optimize.minpack import curve_fit
+from _plotly_utils.basevalidators import is_numpy_convertable
+from numpy import mean
+from numpy.fft import fft2, fftshift
 from scipy.optimize import dual_annealing
+from scipy.optimize.minpack import curve_fit
 from typing_extensions import TypedDict
 
 from . import NPS
-from .util import get_freq
 from .PupilFunc import pupil_func
+from .util import get_freq
+
+
+def odfft(od):
+    return abs(fftshift(fft2(fftshift(od))))
 
 
 # %%
-def from_od(OD_data, norm=False, imgSysData=None):
+def from_od_data(OD_data, norm=False, imgSysData=None):
     """
     This is a combination of `ReadInImages` and `calcNPS__`. 
     Calculate the experimental imaging response function.
@@ -50,6 +56,11 @@ def from_od(OD_data, norm=False, imgSysData=None):
     M2k_Exp = M2k_Exp_atom  #- M2k_Exp_noise
 
     return M2k_Exp, M2k_Exp_atom, M2k_Exp_noise
+
+
+def from_ods(ods):
+    "Generate M2k_Exp from a series of od"
+    return mean(list(map(odfft, ods)), axis=0)
 
 
 def mtf(K_X, K_Y, d, tau, S0, alpha, phi, beta, delta_s):

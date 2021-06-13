@@ -101,9 +101,9 @@ def m2k_fit_cost_concentric(size, radius, decay_radius):
 
     def fdecay(x, y):
         r = np.abs((x - center)**2 + (y - center)**2)
-        return 1 - exp(-(r / (decay_radius/3))**2)
-    
-    def fcirc(x,y):
+        return 1 - exp(-(r / (decay_radius / 3))**2)
+
+    def fcirc(x, y):
         return np.abs((x - center)**2 + (y - center)**2) <= radius
 
     decay_mask = np.fromfunction(fdecay, (size, size))
@@ -120,72 +120,75 @@ def m2k_fit_cost_concentric(size, radius, decay_radius):
 # READ THE DATA
 from UltraCold import MTF, OD
 
-para_bounds = [[1, 0.5, -20, -20, -pi, -30, -pi], 
-            [50, 10, 20, 20, pi, 30, pi]]
-for ods, dataset_id in OD.get_dataset("031550", mode='group', auto_trap=True):
-    para_bounds = [[1, 0, 0, 0.8, -0.5, -0.3, 0],
-                   [50, 10, 0.1, 1, -0.4, 0, 0.1]]
-    # for ods, dataset_id in OD.iter_through_dir(mode='group', auto_trap=True):
-    odmean = mean(ods, axis=0)
-    od_fft_mean = mean(list(map(odfft, ods)), axis=0)
+para_bounds = [[1, 0.5, -20, -20, -pi, -30, -pi], [50, 10, 20, 20, pi, 30, pi]]
 
-    M2k_Exp = od_fft_mean
-    from perform_fitting import imgSysData, fit_visualizations
-    res = MTF.fit(
-        M2k_Exp,
-        imgSysData,
-        dict_format=True,
-        paras_bounds=para_bounds,
-        m2k_fit_cost=m2k_fit_cost_concentric(100, 15, 1),
-    )
+if __name__ == '__main__':
+    for ods, dataset_id in OD.get_dataset("031550",
+                                          mode='group',
+                                          auto_trap=True):
+        para_bounds = [[1, 0, 0, 0.8, -0.5, -0.3, 0],
+                       [50, 10, 0.1, 1, -0.4, 0, 0.1]]
+        # for ods, dataset_id in OD.iter_through_dir(mode='group', auto_trap=True):
+        odmean = mean(ods, axis=0)
+        od_fft_mean = mean(list(map(odfft, ods)), axis=0)
 
-    # generate visualize
-    M2k_Fit, params = res['M2k'], res['params']
+        M2k_Exp = od_fft_mean
+        from perform_fitting import imgSysData, fit_visualizations
+        res = MTF.fit(
+            M2k_Exp,
+            imgSysData,
+            dict_format=True,
+            paras_bounds=para_bounds,
+            m2k_fit_cost=m2k_fit_cost_concentric(100, 15, 1),
+        )
 
-    saveDir = join(SAVE_DIR, dataset_id)
-    params['saveDir'] = saveDir
+        # generate visualize
+        M2k_Fit, params = res['M2k'], res['params']
 
-    # create folder
-    try:
-        mkdir(saveDir)
-    except:
-        pass
+        saveDir = join(SAVE_DIR, dataset_id)
+        params['saveDir'] = saveDir
 
-    # plot OD mean
-    try:
-        plot_od(odmean, 'mean', dataset_id)
-    except:
-        pass
+        # create folder
+        try:
+            mkdir(saveDir)
+        except:
+            pass
 
-    # plot OD fft mean
-    try:
-        plot_mtf(od_fft_mean, 'mtf-exp', dataset_id)
-    except:
-        pass
+        # plot OD mean
+        try:
+            plot_od(odmean, 'mean', dataset_id)
+        except:
+            pass
 
-    # perform fitting
-    fit_visualizations(params, M2k_Exp, M2k_Fit)
+        # plot OD fft mean
+        try:
+            plot_mtf(od_fft_mean, 'mtf-exp', dataset_id)
+        except:
+            pass
 
-    # plot OD fft fit
-    try:
-        plot_mtf(M2k_Fit, 'mtf-fit', dataset_id)
-    except:
-        pass
+        # perform fitting
+        fit_visualizations(params, M2k_Exp, M2k_Fit)
 
-    # write the parameters
-    with open(join(saveDir, "fit.txt"), 'w+') as f:
-        lines = [
-            f"A = {params['A_fit']}", \
-            f"tau = {params['tau_fit']}", \
-            f"S0 = {params['S0_fit']}", \
-            f"alpha = {params['alpha_fit']}", \
-            f"phi = {params['phi_fit']}", \
-            f"beta = {params['beta_fit']}", \
-            f"delta_s = {params['delta_s_fit']}" \
-            f"pcov = {params['pcov']}", \
-            f"para_bounds = "+repr(para_bounds), \
-        ]
-        f.write('\n'.join(lines))
+        # plot OD fft fit
+        try:
+            plot_mtf(M2k_Fit, 'mtf-fit', dataset_id)
+        except:
+            pass
+
+        # write the parameters
+        with open(join(saveDir, "fit.txt"), 'w+') as f:
+            lines = [
+                f"A = {params['A_fit']}", \
+                f"tau = {params['tau_fit']}", \
+                f"S0 = {params['S0_fit']}", \
+                f"alpha = {params['alpha_fit']}", \
+                f"phi = {params['phi_fit']}", \
+                f"beta = {params['beta_fit']}", \
+                f"delta_s = {params['delta_s_fit']}" \
+                f"pcov = {params['pcov']}", \
+                f"para_bounds = "+repr(para_bounds), \
+            ]
+            f.write('\n'.join(lines))
 
 # %%
 

@@ -11,7 +11,7 @@ def plot_od_avg(imgDir,
 
     atomODs, *_ = from_image_dir(imgDir)
 
-    atomODAvg = np.mean(atomODs,axis=0)
+    atomODAvg = np.mean(atomODs, axis=0)
 
     fig_atom = plt.figure()
     ax_atom = fig_atom.add_subplot(111)
@@ -53,9 +53,9 @@ def do_analysis(img_dir,
                 normalize=False):
     from . import MTF, NPS, Sk
     *OD_data, img_index_range = from_image_dir(img_dir,
-                                              trapRegion=trapRegion,
-                                              noiseRegion=noiseRegion)
-    NPS_Exp, *_ = MTF.from_od(OD_data, norm=normalize, imgSysData=imgSysData)
+                                               trapRegion=trapRegion,
+                                               noiseRegion=noiseRegion)
+    NPS_Exp, *_ = MTF.from_od_data(OD_data, norm=normalize, imgSysData=imgSysData)
 
     K_X, K_Y, S, k, S_azmAvg = Sk.from_nps_mtf(NPS_Exp, M2k, imgSysData)
     # *_, K_X, K_Y = get_freq(imgSysData["CCDPixelSize"],

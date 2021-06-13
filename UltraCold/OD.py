@@ -185,32 +185,38 @@ def get_trap_image(ods, trap_size=100):
         yield od[tuple(trap_region)]
 
 
-def get_dataset(dataset_id,
-                auto_trap=True,
-                mode='flat',
-                DATA_DIR="DATA",
-                trap_size=100):
+def from_dataset(dataset_id, auto_trap=True, DATA_DIR="DATA", trap_size=100):
+    """
+    @brief Iterate through a data directory with many datasets in separate folders.
+
+    @param dataset_id. The ID of the dataset.
+
+    @param auto_trap If set `True`, the trap_region will be automatically extracted.
+    The yielded od images will be only the trap region. 
+    If `false`, entire od image will be yielded.
+
+    @return A generator of od images. Each yielded item will be
+    `(od, dataset_id, index_in_dataset)` for `flat`, and
+    `(ods, dataset_id)` for `group`.
+    """
+
     dataset_path = join(DATA_DIR, dataset_id)
-    ods, _, _ = from_image_dir(dataset_path)
+    ods, *_ = from_image_dir(dataset_path)
     print(f'id: {dataset_id}, #img: {len(ods)}')
-    if not len(ods): return
+    if not len(ods):
+        raise FileNotFoundError(dataset_path)
 
     # get_trap_image = lambda x: get_trap_image(x, trap_size=trap_size)
 
     # determine noise regions
     if auto_trap:
         try:
-            if mode == 'flat':
-                for i, od in enumerate(get_trap_image(ods)):
-                    yield od, dataset_id, i
-            elif mode == 'group':
-                yield list(get_trap_image(ods)), dataset_id
+            return list(get_trap_image(ods))
         except:
-            print(f'id: {dataset_id} skipped due to bad trap region')
+            print(
+                f'id: {dataset_id} has bad trap region. Original od is returned'
+            )
+            return ods
 
     else:
-        if mode == 'flat':
-            for i, od in enumerate(ods):
-                yield od, dataset_id, i
-        elif mode == 'group':
-            yield ods, dataset_id
+        return ods
