@@ -16,6 +16,7 @@ def get_freq(CCDPixelSize, magnification, M2k_mat_shape):
     k_x = np.fft.fftshift(np.fft.fftfreq(sampleNum_x, px_x)) * 2 * np.pi
     k_y = np.fft.fftshift(np.fft.fftfreq(sampleNum_y, px_y)) * 2 * np.pi
 
+    # TODO figure out what this means
     K_x, K_y = np.meshgrid(k_x, k_y)
 
     return k_x, k_y, K_x, K_y

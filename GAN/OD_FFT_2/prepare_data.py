@@ -33,7 +33,7 @@ def get_vmax(img, q=CUTOFF):
     return np.percentile(img.flatten(), q)
 
 
-for ods, dataset_id in OD.iter_through_dir(mode='group'):
+for ods, dataset_id in OD.iter_through_dir(mode='group', auto_trap=True):
 
     ods_fft = [odfft(od) for od in ods]
     odfftavg = np.mean(ods_fft, axis=0)

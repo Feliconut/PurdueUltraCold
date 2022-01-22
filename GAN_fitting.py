@@ -21,5 +21,15 @@ plt.imshow(res[10])
 # %%
 i = 40
 print(f'fitting result for image from {ids[i]}')
-perform_fitting.fit(res[i].reshape((128,128)))
+perform_fitting.fit(res[i].reshape((128, 128)))
+# %%
+i = 40
+print(f'classical fitting result for image from {ids[i]}')
+perform_fitting.fit(tar[i].reshape((128, 128)))
+# %%
+plt.imshow(res[i])
+# %%
+plt.imshow(src[i])
+# %%
+plt.imshow(tar[i])
 # %%

@@ -215,8 +215,6 @@ def update_exp_figure(dataset_id, A):
 
 # TODO Export fitting parameters
 
-
-# TODO specify dataset ID
 # TODO click to fit
 
 
